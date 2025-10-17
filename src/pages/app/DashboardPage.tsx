@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { Suspense } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { dashboardMetrics } from '@/data/mocks';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { ActiveCampaignsTable } from './dashboard/ActiveCampaignsTable';
@@ -7,6 +7,8 @@ import { DashboardChart } from './dashboard/DashboardChart';
 import { ConversionGoalsCard } from './dashboard/ConversionGoalsCard';
 import { AiSuggestionsCard } from './dashboard/AiSuggestionsCard';
 import { cn } from '@/lib/utils';
+import { RecentCampaignsTable } from './dashboard/RecentCampaignsTable';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MetricCard: React.FC<{ metric: typeof dashboardMetrics[0] }> = ({ metric }) => {
   const { icon: Icon, title, value, change, changeType, color } = metric;
@@ -37,13 +39,21 @@ const MetricCard: React.FC<{ metric: typeof dashboardMetrics[0] }> = ({ metric }
 const DashboardPage: React.FC = () => {
   return (
     <div className="flex-1 space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {dashboardMetrics.map((metric) => (
-          <MetricCard key={metric.title} metric={metric} />
-        ))}
-      </div>
+       <Suspense fallback={
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-[126px]" />
+            <Skeleton className="h-[126px]" />
+            <Skeleton className="h-[126px]" />
+            <Skeleton className="h-[126px]" />
+          </div>
+        }>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {dashboardMetrics.map((metric) => (
+            <MetricCard key={metric.title} metric={metric} />
+          ))}
+        </div>
+      </Suspense>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main column */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
@@ -63,10 +73,18 @@ const DashboardPage: React.FC = () => {
           </Card>
         </div>
         
-        {/* Side column */}
         <div className="lg:col-span-1 space-y-6">
           <ConversionGoalsCard />
           <AiSuggestionsCard />
+          <Card>
+            <CardHeader>
+                <CardTitle>Campanhas Recentes</CardTitle>
+                <CardDescription>Campanhas concluídas recentemente.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <RecentCampaignsTable />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

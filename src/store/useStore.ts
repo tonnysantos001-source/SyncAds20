@@ -26,6 +26,11 @@ interface AppState {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  updateUser: (user: Partial<User>) => void;
+
+  // Global Search
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
 
   // Integrations
   connectedIntegrations: Set<IntegrationId>;
@@ -42,6 +47,7 @@ interface AppState {
   // Campaigns
   campaigns: Campaign[];
   addCampaign: (campaign: Omit<Campaign, 'id'>) => void;
+  updateCampaign: (id: string, campaignData: Partial<Campaign>) => void;
   updateCampaignStatus: (id: string, status: Campaign['status']) => void;
   deleteCampaign: (id: string) => void;
 
@@ -59,16 +65,22 @@ export const useStore = create<AppState>()(
       user: null,
       login: (user) => set({ isAuthenticated: true, user }),
       logout: () => {
-        // Clear non-persisted state if any, then reset persisted state
         set({ 
           isAuthenticated: false, 
           user: null, 
-          // Optionally reset other parts of the state on logout
           campaigns: initialCampaigns,
           apiKeys: initialApiKeys,
           connectedIntegrations: new Set(['google-analytics', 'github']),
+          searchTerm: '',
         });
       },
+      updateUser: (userData) => set((state) => ({
+        user: state.user ? { ...state.user, ...userData } : null
+      })),
+
+      // Global Search
+      searchTerm: '',
+      setSearchTerm: (term) => set({ searchTerm: term }),
 
       // Integrations
       connectedIntegrations: new Set(['google-analytics', 'github']),
@@ -101,7 +113,10 @@ export const useStore = create<AppState>()(
       // Campaigns
       campaigns: initialCampaigns,
       addCampaign: (campaignData) => set((state) => ({
-        campaigns: [{ id: `CAM-${uuidv4().slice(0,4)}`, ...campaignData }, ...state.campaigns],
+        campaigns: [{ id: `CAM-${uuidv4().slice(0,4)}`, ...campaignData } as Campaign, ...state.campaigns],
+      })),
+      updateCampaign: (id, campaignData) => set(state => ({
+        campaigns: state.campaigns.map(c => c.id === id ? { ...c, ...campaignData } : c),
       })),
       updateCampaignStatus: (id, status) => set((state) => ({
         campaigns: state.campaigns.map(c => c.id === id ? { ...c, status } : c),
@@ -130,7 +145,6 @@ export const useStore = create<AppState>()(
     {
       name: 'marketing-ai-storage',
       storage: createJSONStorage(() => localStorage),
-      // Custom merge function to handle Set serialization
       merge: (persistedState, currentState) => {
         const state = { ...currentState, ...(persistedState as object) };
         if ((persistedState as AppState)?.connectedIntegrations) {
@@ -138,13 +152,10 @@ export const useStore = create<AppState>()(
         }
         return state;
       },
-       // Don't persist mock data if it's meant to be fresh on each load
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,
         connectedIntegrations: state.connectedIntegrations,
-        // campaigns: state.campaigns, // Uncomment to persist campaign changes
-        // apiKeys: state.apiKeys, // Uncomment to persist API key changes
       }),
     }
   )

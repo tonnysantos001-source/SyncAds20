@@ -30,7 +30,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
   const { theme, setTheme } = useTheme();
-  const { user, logout } = useStore();
+  const { user, logout, searchTerm, setSearchTerm } = useStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -55,6 +55,8 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
           type="search"
           placeholder="Busca global..."
           className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       <Button variant="outline" size="icon" className="relative">

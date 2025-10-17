@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Filter } from 'lucide-react';
+import { PlusCircle, Filter, View } from 'lucide-react';
 import { Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,6 +13,8 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { NewCampaignModal } from './campaigns/NewCampaignModal';
 import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/use-toast';
+import { Link } from 'react-router-dom';
+import { EditCampaignModal } from './campaigns/EditCampaignModal';
 
 const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'> = {
   'Ativa': 'success',
@@ -20,7 +22,7 @@ const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'
   'Concluída': 'default',
 };
 
-const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
+const CampaignCard: React.FC<{ campaign: Campaign; onEdit: (campaign: Campaign) => void; }> = ({ campaign, onEdit }) => {
   const { updateCampaignStatus, deleteCampaign } = useStore();
   const { toast } = useToast();
   const budgetPercentage = (campaign.budgetSpent / campaign.budgetTotal) * 100;
@@ -85,7 +87,8 @@ const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to={`/campaigns/${campaign.id}`}><View className="mr-2 h-4 w-4" /> Ver Detalhes</Link></DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit(campaign)}><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
                 <DropdownMenuItem onClick={handleStatusChange}>
                   {campaign.status === 'Ativa' ? (
                     <><Pause className="mr-2 h-4 w-4" /> Pausar</>
@@ -121,34 +124,44 @@ const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
 };
 
 const CampaignsPage: React.FC = () => {
-  const campaigns = useStore(state => state.campaigns);
+  const { campaigns, searchTerm } = useStore(state => ({ campaigns: state.campaigns, searchTerm: state.searchTerm }));
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'Todas'>('Todas');
   const [platformFilter, setPlatformFilter] = useState<CampaignPlatform | 'Todas'>('Todas');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const itemsPerPage = 6;
+
+  const handleEditClick = (campaign: Campaign) => {
+    setEditingCampaign(campaign);
+    setIsEditModalOpen(true);
+  };
 
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter(c => {
       const statusMatch = statusFilter === 'Todas' || c.status === statusFilter;
       const platformMatch = platformFilter === 'Todas' || c.platform === platformFilter;
-      return statusMatch && platformMatch;
+      const searchMatch = searchTerm === '' || c.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return statusMatch && platformMatch && searchMatch;
     });
-  }, [statusFilter, platformFilter, campaigns]);
+  }, [statusFilter, platformFilter, campaigns, searchTerm]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
   const paginatedCampaigns = filteredCampaigns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <>
-      <NewCampaignModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
+      <NewCampaignModal isOpen={isNewModalOpen} onOpenChange={setIsNewModalOpen} />
+      {editingCampaign && <EditCampaignModal isOpen={isEditModalOpen} onOpenChange={setIsEditModalOpen} campaign={editingCampaign} />}
+      
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Campanhas</h1>
             <p className="text-muted-foreground">Gerencie todas as suas campanhas em um só lugar.</p>
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>
+          <Button onClick={() => setIsNewModalOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Nova Campanha
           </Button>
@@ -190,7 +203,7 @@ const CampaignsPage: React.FC = () => {
           <CardContent>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {paginatedCampaigns.map(campaign => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
+                <CampaignCard key={campaign.id} campaign={campaign} onEdit={handleEditClick} />
               ))}
             </div>
             {paginatedCampaigns.length === 0 && (

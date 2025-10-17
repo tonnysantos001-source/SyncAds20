@@ -100,7 +100,9 @@ function toast(props: Toast) {
         if (!open) {
           // When the toast is closed by Radix UI, we schedule its removal 
           // from the state after the animation is finished.
-          setTimeout(() => {
+          // FIX: Use window.setTimeout to ensure we're using the browser's timer
+          // and not a Node.js polyfill that might be causing issues in this environment.
+          window.setTimeout(() => {
             dispatch({ type: "REMOVE_TOAST", toastId: id })
           }, 500) // Wait for exit animation
         }

@@ -14,6 +14,10 @@ export type Campaign = {
   impressions: number;
   clicks: number;
   conversions: number;
+  startDate: string;
+  endDate: string;
+  ctr: number;
+  cpc: number;
 };
 
 export type Metric = {
@@ -109,6 +113,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 120500,
     clicks: 2340,
     conversions: 112,
+    startDate: '2025-06-01',
+    endDate: '2025-07-15',
+    ctr: 1.94,
+    cpc: 0.64,
   },
   {
     id: 'CAM-002',
@@ -120,6 +128,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 850200,
     clicks: 15600,
     conversions: 980,
+    startDate: '2024-11-20',
+    endDate: '2024-11-30',
+    ctr: 1.83,
+    cpc: 0.32,
   },
   {
     id: 'CAM-003',
@@ -131,6 +143,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 45000,
     clicks: 980,
     conversions: 45,
+    startDate: '2025-05-10',
+    endDate: '2025-08-10',
+    ctr: 2.18,
+    cpc: 0.82,
   },
   {
     id: 'CAM-004',
@@ -142,6 +158,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 78000,
     clicks: 1200,
     conversions: 60,
+    startDate: '2025-04-01',
+    endDate: '2025-09-01',
+    ctr: 1.54,
+    cpc: 0.25,
   },
   {
     id: 'CAM-005',
@@ -153,6 +173,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 350000,
     clicks: 8800,
     conversions: 420,
+    startDate: '2025-06-15',
+    endDate: '2025-07-30',
+    ctr: 2.51,
+    cpc: 0.28,
   },
   {
     id: 'CAM-006',
@@ -164,6 +188,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 30000,
     clicks: 1500,
     conversions: 250,
+    startDate: '2025-03-01',
+    endDate: '2025-03-15',
+    ctr: 5.00,
+    cpc: 0.80,
   },
   {
     id: 'CAM-007',
@@ -175,6 +203,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 25000,
     clicks: 400,
     conversions: 15,
+    startDate: '2025-06-20',
+    endDate: '2025-07-20',
+    ctr: 1.60,
+    cpc: 0.38,
   },
   {
     id: 'CAM-008',
@@ -186,6 +218,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 450000,
     clicks: 7500,
     conversions: 300,
+    startDate: '2025-01-01',
+    endDate: '2025-12-31',
+    ctr: 1.67,
+    cpc: 0.43,
   },
   {
     id: 'CAM-009',
@@ -197,6 +233,10 @@ export const allCampaigns: Campaign[] = [
     impressions: 95000,
     clicks: 1800,
     conversions: 95,
+    startDate: '2025-07-01',
+    endDate: '2025-07-31',
+    ctr: 1.89,
+    cpc: 0.28,
   },
   {
     id: 'CAM-010',
@@ -208,8 +248,16 @@ export const allCampaigns: Campaign[] = [
     impressions: 80000,
     clicks: 400,
     conversions: 12,
+    startDate: '2025-05-01',
+    endDate: '2025-05-31',
+    ctr: 0.50,
+    cpc: 5.00,
   },
 ];
+
+export const recentCampaigns: Campaign[] = allCampaigns
+  .filter(c => c.status === 'Concluída')
+  .slice(0, 5);
 
 export const integrations: Integration[] = [
   { id: 'google-ads', name: 'Google Ads', description: 'Conecte sua conta do Google Ads.', logo: Globe },
