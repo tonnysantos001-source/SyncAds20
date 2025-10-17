@@ -1,4 +1,2 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
-
-export default tseslint.config(js.configs.recommended, tseslint.configs.recommended);
+// This is a placeholder config file. The main configuration is in eslint.dualite.config.js
+export default [];
