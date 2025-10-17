@@ -1,4 +1,4 @@
-import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, TrendingUp } from 'lucide-react';
+import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database } from 'lucide-react';
 
 // Tipos
 export type CampaignStatus = 'Ativa' | 'Pausada' | 'Concluída';
@@ -23,6 +23,28 @@ export type Metric = {
   changeType: 'increase' | 'decrease';
   icon: React.ElementType;
 };
+
+export type Integration = {
+  id: string;
+  name: string;
+  description: string;
+  logo: React.FC<any>;
+};
+
+export type Invoice = {
+  id: string;
+  date: string;
+  amount: string;
+  status: 'Paga' | 'Pendente';
+};
+
+export type ApiKey = {
+  id: string;
+  key: string;
+  createdAt: string;
+  lastUsed: string;
+};
+
 
 // Dados Mock
 export const dashboardMetrics: Metric[] = [
@@ -179,5 +201,67 @@ export const allCampaigns: Campaign[] = [
   },
 ];
 
-
 export const recentCampaigns: Campaign[] = allCampaigns.slice(0, 5);
+
+export const integrations: Integration[] = [
+  { id: 'google-ads', name: 'Google Ads', description: 'Conecte sua conta do Google Ads.', logo: Globe },
+  { id: 'meta-ads', name: 'Meta Ads', description: 'Conecte sua conta do Meta Ads.', logo: Facebook },
+  { id: 'linkedin-ads', name: 'LinkedIn Ads', description: 'Conecte sua conta do LinkedIn Ads.', logo: Linkedin },
+  { id: 'google-analytics', name: 'Google Analytics', description: 'Sincronize com o Google Analytics.', logo: BarChart3 },
+  { id: 'mailchimp', name: 'Mailchimp', description: 'Conecte sua conta do Mailchimp.', logo: Mail },
+  { id: 'shopify', name: 'Shopify', description: 'Sincronize os dados da sua loja.', logo: Store },
+  { id: 'youtube', name: 'YouTube', description: 'Analise a performance do seu canal.', logo: Youtube },
+  { id: 'supabase', name: 'Supabase', description: 'Conecte seu projeto Supabase.', logo: Database },
+  { id: 'github', name: 'GitHub', description: 'Conecte seu repositório GitHub.', logo: Github },
+];
+
+export const billingHistory: Invoice[] = [
+  { id: 'INV-001', date: '01/06/2025', amount: 'R$ 99,00', status: 'Paga' },
+  { id: 'INV-002', date: '01/05/2025', amount: 'R$ 99,00', status: 'Paga' },
+  { id: 'INV-003', date: '01/04/2025', amount: 'R$ 99,00', status: 'Paga' },
+  { id: 'INV-004', date: '01/03/2025', amount: 'R$ 99,00', status: 'Paga' },
+];
+
+export const apiKeysData: ApiKey[] = [
+  { id: 'key-1', key: 'sk_live_******************1234', createdAt: '15/05/2025', lastUsed: '28/06/2025' },
+  { id: 'key-2', key: 'sk_test_******************5678', createdAt: '01/03/2025', lastUsed: '25/06/2025' },
+];
+
+export type ChatMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export type ChatConversation = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+};
+
+export const chatConversations: ChatConversation[] = [
+  {
+    id: 'conv-1',
+    title: 'Campanha de Facebook Ads',
+    messages: [
+      { id: 'msg-1', role: 'user', content: 'Criar campanha de Facebook Ads para o produto X.' },
+      { id: 'msg-2', role: 'assistant', content: 'Claro! Qual é o objetivo principal da campanha? (Ex: Vendas, Leads, Tráfego)' },
+    ],
+  },
+  {
+    id: 'conv-2',
+    title: 'Análise da última semana',
+    messages: [
+      { id: 'msg-3', role: 'user', content: 'Analisar performance da última semana.' },
+      { id: 'msg-4', role: 'assistant', content: 'Na última semana, sua taxa de conversão aumentou 15% e o ROI foi de R$ 2.500. A campanha "Lançamento Verão 2025" foi a de melhor desempenho.' },
+    ],
+  },
+  {
+    id: 'conv-3',
+    title: 'Sugestões de otimização',
+    messages: [
+      { id: 'msg-5', role: 'user', content: 'Sugerir otimizações para a campanha "Geração de Leads B2B".' },
+      { id: 'msg-6', role: 'assistant', content: 'Sugiro testar um novo criativo com um vídeo e aumentar o orçamento para o público de "Gerentes de Marketing" em 20%, pois ele está apresentando um CTR 30% maior que a média.' },
+    ],
+  },
+];

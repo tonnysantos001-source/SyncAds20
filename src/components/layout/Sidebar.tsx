@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Megaphone,
-  BarChart3,
   Bot,
   Plug,
   Settings,
@@ -22,7 +21,6 @@ interface SidebarProps {
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/campaigns', icon: Megaphone, label: 'Campanhas' },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/chat', icon: Bot, label: 'Chat IA' },
   { to: '/integrations', icon: Plug, label: 'Integrações' },
 ];
@@ -49,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const SidebarContent = () => (
     <div className={cn("flex h-full max-h-screen flex-col gap-2", isCollapsed && "items-center")}>
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-        <Logo />
+        {!isCollapsed && <Logo />}
       </div>
       <div className="flex-1">
         <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isCollapsed && "px-2")}>
@@ -58,11 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
           ))}
         </nav>
       </div>
-      <div className="mt-auto p-4">
-        <Button size="icon" variant="outline" className="w-full hidden sm:flex" onClick={() => setIsCollapsed(!isCollapsed)}>
-          <PanelLeft className={cn("h-5 w-5 transition-transform", isCollapsed && "rotate-180")} />
-        </Button>
-        <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isCollapsed && "px-2")}>
+      <div className="mt-auto p-4 border-t">
+        <nav className={cn("grid items-start gap-1 text-sm font-medium", isCollapsed && "px-0")}>
            <NavLink
               to="/settings"
               className={({ isActive }) =>
@@ -77,6 +72,9 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
               {!isCollapsed && <span>Configurações</span>}
             </NavLink>
         </nav>
+        <Button size="icon" variant="outline" className="w-full hidden sm:flex mt-4" onClick={() => setIsCollapsed(!isCollapsed)}>
+          <PanelLeft className={cn("h-5 w-5 transition-transform", isCollapsed && "rotate-180")} />
+        </Button>
       </div>
     </div>
   );
@@ -97,12 +95,12 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="p-4">
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="absolute top-3 right-3">
+        <div className="p-4 absolute top-0 right-0">
+          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
             <X className="h-6 w-6" />
           </Button>
-          <SidebarContent />
         </div>
+        <SidebarContent />
       </div>
 
       {/* Desktop Sidebar */}
