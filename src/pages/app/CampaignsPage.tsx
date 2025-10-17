@@ -1,0 +1,202 @@
+import React, { useState, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Filter, X } from 'lucide-react';
+import { allCampaigns, Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Edit, Play, Pause, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/Pagination';
+import { NewCampaignModal } from './campaigns/NewCampaignModal';
+
+const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'> = {
+  'Ativa': 'success',
+  'Pausada': 'warning',
+  'Concluída': 'default',
+};
+
+const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
+  const budgetPercentage = (campaign.budgetSpent / campaign.budgetTotal) * 100;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg">{campaign.name}</CardTitle>
+            <CardDescription>{campaign.platform}</CardDescription>
+          </div>
+          <Badge variant={statusVariantMap[campaign.status]}>{campaign.status}</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="flex justify-between text-sm text-muted-foreground mb-1">
+            <span>Orçamento</span>
+            <span>{`R$${campaign.budgetSpent.toLocaleString('pt-BR')} / R$${campaign.budgetTotal.toLocaleString('pt-BR')}`}</span>
+          </div>
+          <Progress value={budgetPercentage} />
+        </div>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-sm text-muted-foreground">Impressões</p>
+            <p className="font-semibold">{campaign.impressions.toLocaleString('pt-BR')}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Cliques</p>
+            <p className="font-semibold">{campaign.clicks.toLocaleString('pt-BR')}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Conversões</p>
+            <p className="font-semibold">{campaign.conversions.toLocaleString('pt-BR')}</p>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <AlertDialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
+                {campaign.status === 'Ativa' ? (
+                  <DropdownMenuItem><Pause className="mr-2 h-4 w-4" /> Pausar</DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem><Play className="mr-2 h-4 w-4" /> Ativar</DropdownMenuItem>
+                )}
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                    <Trash2 className="mr-2 h-4 w-4" /> Deletar
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso irá deletar permanentemente a campanha "{campaign.name}".
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const CampaignsPage: React.FC = () => {
+  const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'Todas'>('Todas');
+  const [platformFilter, setPlatformFilter] = useState<CampaignPlatform | 'Todas'>('Todas');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const itemsPerPage = 6;
+
+  const filteredCampaigns = useMemo(() => {
+    return allCampaigns.filter(c => {
+      const statusMatch = statusFilter === 'Todas' || c.status === statusFilter;
+      const platformMatch = platformFilter === 'Todas' || c.platform === platformFilter;
+      return statusMatch && platformMatch;
+    });
+  }, [statusFilter, platformFilter]);
+
+  const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
+  const paginatedCampaigns = filteredCampaigns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  return (
+    <>
+      <NewCampaignModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Campanhas</h1>
+            <p className="text-muted-foreground">Gerencie todas as suas campanhas em um só lugar.</p>
+          </div>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Nova Campanha
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold">Filtros</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select value={statusFilter} onValueChange={(value: CampaignStatus | 'Todas') => setStatusFilter(value)}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todas">Todos os Status</SelectItem>
+                    <SelectItem value="Ativa">Ativa</SelectItem>
+                    <SelectItem value="Pausada">Pausada</SelectItem>
+                    <SelectItem value="Concluída">Concluída</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={platformFilter} onValueChange={(value: CampaignPlatform | 'Todas') => setPlatformFilter(value)}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Plataforma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todas">Todas as Plataformas</SelectItem>
+                    <SelectItem value="Google Ads">Google Ads</SelectItem>
+                    <SelectItem value="Meta">Meta</SelectItem>
+                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedCampaigns.map(campaign => (
+                <CampaignCard key={campaign.id} campaign={campaign} />
+              ))}
+            </div>
+            {paginatedCampaigns.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                  <p>Nenhuma campanha encontrada com os filtros selecionados.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {totalPages > 1 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.max(1, p - 1)); }} />
+              </PaginationItem>
+              {[...Array(totalPages)].map((_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink href="#" isActive={currentPage === i + 1} onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1); }}>
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.min(totalPages, p + 1)); }} />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default CampaignsPage;
