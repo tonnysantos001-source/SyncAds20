@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Paperclip, Send, User, Bot, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Paperclip, Send, User, Bot, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import Textarea from 'react-textarea-autosize';
 import { useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
 
 const quickSuggestions = [
   "Criar campanha de Facebook Ads",
@@ -26,6 +27,8 @@ const ChatPage: React.FC = () => {
   const isAssistantTyping = useStore(s => s.isAssistantTyping);
   const setAssistantTyping = useStore(s => s.setAssistantTyping);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
@@ -50,6 +53,25 @@ const ChatPage: React.FC = () => {
 
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
+  };
+
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast({
+        title: "Arquivo Selecionado",
+        description: `O arquivo "${file.name}" está pronto para ser enviado (simulação).`,
+        variant: "info",
+      });
+    }
+    // Reset file input to allow selecting the same file again
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   return (
@@ -154,7 +176,8 @@ const ChatPage: React.FC = () => {
                 maxLength={MAX_CHARS}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                <Button type="button" size="icon" variant="ghost">
+                <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
+                <Button type="button" size="icon" variant="ghost" onClick={handleAttachClick}>
                   <Paperclip className="h-5 w-5" />
                 </Button>
                 <Button type="submit" size="icon" onClick={handleSend} disabled={input.trim() === ''}>
@@ -162,7 +185,7 @@ const ChatPage: React.FC = () => {
                 </Button>
               </div>
             </div>
-             <p className={cn("text-xs text-right mt-1 sm:hidden", input.length > MAX_CHARS ? "text-destructive" : "text-muted-foreground")}>
+             <p className={cn("text-xs text-right mt-1", input.length > MAX_CHARS ? "text-destructive" : "text-muted-foreground")}>
                 {input.length} / {MAX_CHARS}
             </p>
           </div>

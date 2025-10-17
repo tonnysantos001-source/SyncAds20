@@ -7,7 +7,7 @@ import { billingHistory } from '@/data/mocks';
 import { useStore } from '@/store/useStore';
 import { CreditCard, Download, FileText } from 'lucide-react';
 
-const BillingTab: React.FC = () => {
+export const BillingTab: React.FC = () => {
   const user = useStore(state => state.user);
 
   return (
@@ -97,5 +97,3 @@ const BillingTab: React.FC = () => {
     </div>
   );
 };
-
-export default BillingTab;

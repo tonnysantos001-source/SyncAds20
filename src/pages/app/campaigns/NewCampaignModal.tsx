@@ -37,8 +37,10 @@ const steps = [
   { id: 4, name: 'Revisão', fields: [] },
 ];
 
+const MAX_NAME_CHARS = 50;
+
 const campaignSchema = z.object({
-  name: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres.' }),
+  name: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres.' }).max(MAX_NAME_CHARS, { message: `O nome deve ter no máximo ${MAX_NAME_CHARS} caracteres.` }),
   objective: z.string({ required_error: 'O objetivo é obrigatório.' }),
   platform: z.string({ required_error: 'A plataforma é obrigatória.' }),
   dailyBudget: z.number({ required_error: 'Orçamento diário é obrigatório.' }).positive(),
@@ -74,6 +76,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
 
   const { formState: { errors, isValid }, trigger, control, watch, setValue, reset } = form;
   const interests = watch('interests');
+  const nameValue = watch('name');
 
   const handleNext = async () => {
     const fields = steps[currentStep - 1].fields;
@@ -159,8 +162,11 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
             {currentStep === 1 && (
               <div className="grid gap-4 px-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Nome da Campanha</Label>
-                  <Input id="name" {...form.register('name')} placeholder="Ex: Lançamento de Inverno" />
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="name">Nome da Campanha</Label>
+                    <span className="text-xs text-muted-foreground">{nameValue?.length || 0} / {MAX_NAME_CHARS}</span>
+                  </div>
+                  <Input id="name" {...form.register('name')} placeholder="Ex: Lançamento de Inverno" maxLength={MAX_NAME_CHARS} />
                   {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                 </div>
                 <Controller name="objective" control={control} render={({ field }) => (

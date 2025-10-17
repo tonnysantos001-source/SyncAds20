@@ -21,6 +21,15 @@ interface User {
   plan: 'Free' | 'Pro' | 'Enterprise';
 }
 
+export interface NotificationSettings {
+  emailSummary: boolean;
+  emailAlerts: boolean;
+  emailNews: boolean;
+  pushMentions: boolean;
+  pushIntegrations: boolean;
+  pushSuggestions: boolean;
+}
+
 interface AppState {
   // Auth
   isAuthenticated: boolean;
@@ -57,10 +66,23 @@ interface AppState {
   addApiKey: () => string;
   deleteApiKey: (id: string) => void;
 
-  // AI Settings
+  // Settings
   aiSystemPrompt: string;
   setAiSystemPrompt: (prompt: string) => void;
+  isTwoFactorEnabled: boolean;
+  setTwoFactorEnabled: (enabled: boolean) => void;
+  notificationSettings: NotificationSettings;
+  updateNotificationSettings: (settings: Partial<NotificationSettings>) => void;
 }
+
+const initialNotificationSettings: NotificationSettings = {
+  emailSummary: true,
+  emailAlerts: true,
+  emailNews: false,
+  pushMentions: true,
+  pushIntegrations: false,
+  pushSuggestions: true,
+};
 
 export const useStore = create<AppState>()(
   persist(
@@ -75,8 +97,11 @@ export const useStore = create<AppState>()(
           user: null, 
           campaigns: initialCampaigns,
           apiKeys: initialApiKeys,
+          conversations: initialConversations,
           connectedIntegrations: ['google-analytics', 'github'],
           searchTerm: '',
+          isTwoFactorEnabled: false,
+          notificationSettings: initialNotificationSettings,
         });
       },
       updateUser: (userData) => set((state) => ({
@@ -149,9 +174,15 @@ export const useStore = create<AppState>()(
         apiKeys: state.apiKeys.filter(key => key.id !== id),
       })),
 
-      // AI Settings
+      // Settings
       aiSystemPrompt: 'Você é o SyncAds AI, um assistente de marketing digital especializado em otimização de campanhas. Seja proativo, criativo e forneça insights baseados em dados. Suas respostas devem ser claras, concisas e sempre focadas em ajudar o usuário a atingir seus objetivos de marketing.',
       setAiSystemPrompt: (prompt) => set({ aiSystemPrompt: prompt }),
+      isTwoFactorEnabled: false,
+      setTwoFactorEnabled: (enabled) => set({ isTwoFactorEnabled: enabled }),
+      notificationSettings: initialNotificationSettings,
+      updateNotificationSettings: (settings) => set(state => ({
+        notificationSettings: { ...state.notificationSettings, ...settings }
+      })),
     }),
     {
       name: 'marketing-ai-storage',
@@ -161,11 +192,19 @@ export const useStore = create<AppState>()(
         user: state.user,
         connectedIntegrations: state.connectedIntegrations,
         aiSystemPrompt: state.aiSystemPrompt,
+        isTwoFactorEnabled: state.isTwoFactorEnabled,
+        notificationSettings: state.notificationSettings,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          if (!state.campaigns) state.campaigns = initialCampaigns;
+          if (!state.apiKeys) state.apiKeys = initialApiKeys;
+          if (!state.conversations) state.conversations = initialConversations;
           if (!Array.isArray(state.connectedIntegrations)) {
             state.connectedIntegrations = ['google-analytics', 'github'];
+          }
+          if (!state.notificationSettings) {
+            state.notificationSettings = initialNotificationSettings;
           }
         }
       },

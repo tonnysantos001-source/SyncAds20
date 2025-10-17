@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/components/ui/use-toast';
+import { useStore } from '@/store/useStore';
 
 export const SecurityTab: React.FC = () => {
+  const { toast } = useToast();
+  const isTwoFactorEnabled = useStore(state => state.isTwoFactorEnabled);
+  const setTwoFactorEnabled = useStore(state => state.setTwoFactorEnabled);
+
+  const [localTwoFactor, setLocalTwoFactor] = useState(isTwoFactorEnabled);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveChanges = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setTwoFactorEnabled(localTwoFactor);
+      setIsSaving(false);
+      toast({
+        title: "Segurança Atualizada",
+        description: "Suas configurações de segurança foram salvas com sucesso.",
+        variant: "success",
+      });
+    }, 1000);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -34,11 +56,11 @@ export const SecurityTab: React.FC = () => {
             <h4 className="font-semibold">Autenticação de Dois Fatores (2FA)</h4>
             <p className="text-sm text-muted-foreground">Adicione uma camada extra de segurança à sua conta.</p>
           </div>
-          <Switch />
+          <Switch checked={localTwoFactor} onCheckedChange={setLocalTwoFactor} />
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button>Atualizar Senha</Button>
+        <Button onClick={handleSaveChanges} loading={isSaving}>Salvar Alterações</Button>
       </CardFooter>
     </Card>
   );

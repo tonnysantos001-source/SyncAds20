@@ -49,7 +49,7 @@ export const ProfileTab: React.FC = () => {
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src={avatarPreview || user?.avatarUrl} />
-            <AvatarFallback>{user?.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase() || 'P'}</AvatarFallback>
           </Avatar>
           <div className="grid gap-1.5">
             <Label htmlFor="picture">Avatar</Label>
