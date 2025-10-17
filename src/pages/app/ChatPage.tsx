@@ -2,12 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Paperclip, Send, User, Bot, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Paperclip, Send, User, Bot, PanelLeftClose, PanelLeftOpen, Trash2 } from 'lucide-react';
 import Textarea from 'react-textarea-autosize';
 import { useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const quickSuggestions = [
   "Criar campanha de Facebook Ads",
@@ -20,12 +31,16 @@ const MAX_CHARS = 500;
 const ChatPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const addMessage = useStore((state) => state.addMessage);
-  const conversations = useStore((state) => state.conversations);
-  const activeConversationId = useStore((state) => state.activeConversationId);
-  const setActiveConversationId = useStore((s) => s.setActiveConversationId);
-  const isAssistantTyping = useStore(s => s.isAssistantTyping);
-  const setAssistantTyping = useStore(s => s.setAssistantTyping);
+  const { 
+    addMessage, 
+    conversations, 
+    activeConversationId, 
+    setActiveConversationId,
+    isAssistantTyping,
+    setAssistantTyping,
+    deleteConversation,
+  } = useStore();
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -68,10 +83,18 @@ const ChatPage: React.FC = () => {
         variant: "info",
       });
     }
-    // Reset file input to allow selecting the same file again
     if (event.target) {
       event.target.value = '';
     }
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    deleteConversation(id);
+    toast({
+        title: "Conversa Apagada",
+        description: "A conversa foi removida do seu histórico.",
+        variant: "destructive",
+    });
   };
 
   return (
@@ -82,14 +105,43 @@ const ChatPage: React.FC = () => {
           <h2 className="text-lg font-semibold p-2">Conversas</h2>
           <div className="space-y-1">
             {conversations.map(conv => (
-              <Button
-                key={conv.id}
-                variant={activeConversationId === conv.id ? 'secondary' : 'ghost'}
-                className="w-full justify-start truncate"
-                onClick={() => setActiveConversationId(conv.id)}
-              >
-                {conv.title}
-              </Button>
+              <div key={conv.id} className="group relative">
+                <Button
+                  variant={activeConversationId === conv.id ? 'secondary' : 'ghost'}
+                  className="w-full justify-start truncate pr-8"
+                  onClick={() => setActiveConversationId(conv.id)}
+                >
+                  {conv.title}
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Apagar conversa?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem a certeza que quer apagar a conversa "{conv.title}"? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => handleDeleteConversation(conv.id)}
+                      >
+                        Apagar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             ))}
           </div>
         </CardContent>
@@ -146,7 +198,7 @@ const ChatPage: React.FC = () => {
               </>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p>Selecione uma conversa para começar.</p>
+                <p>Selecione ou crie uma conversa para começar.</p>
               </div>
             )}
           </div>

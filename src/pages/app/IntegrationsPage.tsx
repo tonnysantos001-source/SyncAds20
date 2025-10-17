@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { integrations, Integration } from '@/data/mocks';
+import { categorizedIntegrations, Integration } from '@/data/mocks';
 import { useStore } from '@/store/useStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }) => {
   const connectedIntegrations = useStore(state => state.connectedIntegrations);
@@ -16,8 +17,11 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
   const isConnected = connectedIntegrations.includes(integration.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const { comingSoon } = integration;
 
   const handleToggle = (checked: boolean) => {
+    if (comingSoon) return;
+
     if (checked) {
       setIsModalOpen(true);
     } else {
@@ -56,7 +60,11 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
               <CardTitle className="text-lg">{integration.name}</CardTitle>
             </div>
           </div>
-          <Switch checked={isConnected} onCheckedChange={handleToggle} aria-label={`Conectar ${integration.name}`} />
+          {comingSoon ? (
+            <Badge variant="outline">Em breve</Badge>
+          ) : (
+            <Switch checked={isConnected} onCheckedChange={handleToggle} aria-label={`Conectar ${integration.name}`} />
+          )}
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{integration.description}</p>
@@ -91,16 +99,21 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
 
 const IntegrationsPage: React.FC = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Integrações</h1>
         <p className="text-muted-foreground">Conecte suas ferramentas e automatize seu fluxo de trabalho.</p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {integrations.map(integration => (
-          <IntegrationCard key={integration.id} integration={integration} />
-        ))}
-      </div>
+      {categorizedIntegrations.map(category => (
+        <div key={category.title} className="space-y-4">
+          <h2 className="text-xl font-semibold tracking-tight">{category.title}</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {category.integrations.map(integration => (
+              <IntegrationCard key={integration.id} integration={integration} />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

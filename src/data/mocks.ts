@@ -1,4 +1,4 @@
-import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database, Lightbulb } from 'lucide-react';
+import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database, Lightbulb, Search, Anchor, BrainCircuit, Newspaper, Music, FolderKanban, Instagram, Twitter, MessageCircle, PenSquare, LayoutTemplate, Flame, Palette, Slack, Webhook, Server } from 'lucide-react';
 
 // Tipos
 export type CampaignStatus = 'Ativa' | 'Pausada' | 'Concluída';
@@ -34,6 +34,12 @@ export type Integration = {
   name: string;
   description: string;
   logo: React.FC<any>;
+  comingSoon?: boolean;
+};
+
+export type IntegrationCategory = {
+  title: string;
+  integrations: Integration[];
 };
 
 export type Invoice = {
@@ -259,16 +265,69 @@ export const recentCampaigns: Campaign[] = allCampaigns
   .filter(c => c.status === 'Concluída')
   .slice(0, 5);
 
-export const integrations: Integration[] = [
-  { id: 'google-ads', name: 'Google Ads', description: 'Conecte sua conta do Google Ads.', logo: Globe },
-  { id: 'meta-ads', name: 'Meta Ads', description: 'Conecte sua conta do Meta Ads.', logo: Facebook },
-  { id: 'linkedin-ads', name: 'LinkedIn Ads', description: 'Conecte sua conta do LinkedIn Ads.', logo: Linkedin },
-  { id: 'google-analytics', name: 'Google Analytics', description: 'Sincronize com o Google Analytics.', logo: BarChart3 },
-  { id: 'mailchimp', name: 'Mailchimp', description: 'Conecte sua conta do Mailchimp.', logo: Mail },
-  { id: 'shopify', name: 'Shopify', description: 'Sincronize os dados da sua loja.', logo: Store },
-  { id: 'youtube', name: 'YouTube', description: 'Analise a performance do seu canal.', logo: Youtube },
-  { id: 'supabase', name: 'Supabase', description: 'Conecte seu projeto Supabase.', logo: Database },
-  { id: 'github', name: 'GitHub', description: 'Conecte seu repositório GitHub.', logo: Github },
+export const categorizedIntegrations: IntegrationCategory[] = [
+    {
+        title: "Análise",
+        integrations: [
+            { id: 'google-analytics', name: 'Google Analytics', description: 'Usa o Google Analytics para rastrear e analisar o tráfego do site.', logo: BarChart3 },
+            { id: 'google-search-console', name: 'Google Search Console', description: 'Usa o Google Search Console para analisar o desempenho da pesquisa.', logo: Search },
+            { id: 'ahrefs', name: 'Ahrefs', description: 'Usa Ahrefs para análise de SEO, pesquisa de palavras-chave e monitoramento de backlinks.', logo: Anchor, comingSoon: true },
+        ]
+    },
+    {
+        title: "Anúncios Pagos",
+        integrations: [
+            { id: 'google-ads', name: 'Google Ads', description: 'Usa o Google Ads para gerenciamento e otimização de campanhas.', logo: Globe },
+            { id: 'meta-ads', name: 'Meta Ads', description: 'Utiliza Meta Ads (Facebook/Instagram) para gerenciamento e otimização de campanhas.', logo: Facebook },
+            { id: 'bing-ads', name: 'Bing Ads', description: 'Usa o Bing Ads para marketing de mecanismos de busca e otimização de campanhas.', logo: Globe },
+            { id: 'outbrain', name: 'Outbrain', description: 'Utiliza o Outbrain para descoberta de conteúdo e campanhas de publicidade nativa.', logo: BrainCircuit },
+            { id: 'taboola', name: 'Taboola', description: 'Usa Taboola para descoberta de conteúdo e campanhas de publicidade nativa.', logo: Newspaper },
+            { id: 'tiktok-ads', name: 'TikTok Ads', description: 'Usa o TikTok Ads para campanhas de publicidade em vídeo e segmentação de público.', logo: Music, comingSoon: true },
+            { id: 'linkedin-ads', name: 'LinkedIn Ads', description: 'Utiliza anúncios do LinkedIn para campanhas publicitárias B2B e geração de leads.', logo: Linkedin, comingSoon: true },
+        ]
+    },
+    {
+        title: "Armazenamento",
+        integrations: [
+            { id: 'google-drive', name: 'Google Drive', description: 'Permite que os usuários criem arquivos em seu próprio Google Drive.', logo: FolderKanban },
+            { id: 'postgresql', name: 'PostgreSQL', description: 'Conecte-se a bancos de dados PostgreSQL para consultar e gerenciar dados.', logo: Database },
+        ]
+    },
+    {
+        title: "Mídias Sociais",
+        integrations: [
+            { id: 'facebook', name: 'Facebook', description: 'Publique postagens diretamente em suas páginas do Facebook.', logo: Facebook },
+            { id: 'instagram', name: 'Instagram', description: 'Publique postagens e histórias em suas contas comerciais do Instagram.', logo: Instagram },
+            { id: 'linkedin', name: 'LinkedIn', description: 'Usa o LinkedIn para encontrar leads e compartilhar conteúdo nas páginas da empresa.', logo: Linkedin },
+            { id: 'twitter', name: 'Twitter/X', description: 'Usa o Twitter/X para encontrar tópicos interessantes e compartilhar conteúdo.', logo: Twitter },
+            { id: 'reddit', name: 'Reddit', description: 'Usa o Reddit para encontrar tópicos interessantes e compartilhar conteúdo.', logo: MessageCircle },
+        ]
+    },
+    {
+        title: "Gerenciamento de Conteúdo",
+        integrations: [
+            { id: 'wordpress', name: 'WordPress', description: 'Usa o WordPress para publicar conteúdo em blogs.', logo: PenSquare, comingSoon: true },
+            { id: 'shopify', name: 'Shopify', description: 'Usa o Shopify para publicar conteúdo em blogs de lojas.', logo: Store },
+            { id: 'webflow', name: 'Webflow', description: 'Usa o Webflow para publicar conteúdo em blogs.', logo: LayoutTemplate },
+            { id: 'hubspot', name: 'HubSpot', description: 'Usa o HubSpot para publicar conteúdo em blogs.', logo: Flame },
+        ]
+    },
+    {
+        title: "Design",
+        integrations: [
+            { id: 'canva', name: 'Canva', description: 'Crie e gerencie designs, acesse modelos e automatize a criação de conteúdo.', logo: Palette, comingSoon: true },
+        ]
+    },
+    {
+        title: "Comunicação e Produtividade",
+        integrations: [
+            { id: 'slack', name: 'Slack', description: 'Usa o Slack para notificações e atualizações da equipe.', logo: Slack },
+            { id: 'gmail', name: 'Gmail', description: 'Usa o Gmail para redigir e enviar e-mails.', logo: Mail },
+            { id: 'github', name: 'GitHub', description: 'Usa o GitHub para gerenciamento de repositórios e colaboração de código.', logo: Github },
+            { id: 'webhook', name: 'Webhook', description: 'Configure um webhook para receber dados do SyncAds.', logo: Webhook, comingSoon: true },
+            { id: 'mcp-server', name: 'Servidor MCP', description: 'Acesse o SyncAds pelo seu Claude Desktop, Cursor ou outros clientes MCP.', logo: Server },
+        ]
+    }
 ];
 
 export const billingHistory: Invoice[] = [

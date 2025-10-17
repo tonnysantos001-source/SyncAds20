@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { 
-  integrations as allIntegrations, 
+  categorizedIntegrations, 
   ChatConversation, 
   ChatMessage, 
   chatConversations as initialConversations,
@@ -12,7 +12,7 @@ import {
 } from '@/data/mocks';
 import { v4 as uuidv4 } from 'uuid';
 
-type IntegrationId = typeof allIntegrations[number]['id'];
+type IntegrationId = typeof categorizedIntegrations[0]['integrations'][number]['id'];
 
 interface User {
   name: string;
@@ -51,6 +51,7 @@ interface AppState {
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
   addMessage: (conversationId: string, message: ChatMessage) => void;
+  deleteConversation: (id: string) => void;
   isAssistantTyping: boolean;
   setAssistantTyping: (isTyping: boolean) => void;
 
@@ -138,6 +139,19 @@ export const useStore = create<AppState>()(
           return conv;
         });
         return { conversations: newConversations };
+      }),
+      deleteConversation: (id) => set((state) => {
+        const remainingConversations = state.conversations.filter(conv => conv.id !== id);
+        let newActiveId = state.activeConversationId;
+
+        if (state.activeConversationId === id) {
+          newActiveId = remainingConversations.length > 0 ? remainingConversations[0].id : null;
+        }
+
+        return { 
+          conversations: remainingConversations,
+          activeConversationId: newActiveId,
+        };
       }),
       isAssistantTyping: false,
       setAssistantTyping: (isTyping) => set({ isAssistantTyping: isTyping }),
