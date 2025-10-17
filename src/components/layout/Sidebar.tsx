@@ -8,6 +8,7 @@ import {
   Settings,
   X,
   PanelLeft,
+  BarChart3, // Ícone para Analytics
 } from 'lucide-react';
 import Logo from '../Logo';
 import { Button } from '../ui/button';
@@ -21,6 +22,7 @@ interface SidebarProps {
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/campaigns', icon: Megaphone, label: 'Campanhas' },
+  { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/chat', icon: Bot, label: 'Chat IA' },
   { to: '/integrations', icon: Plug, label: 'Integrações' },
 ];

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,20 +6,20 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, CheckCircle, Circle, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle, Loader2, X } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { z } from 'zod';
 
 interface NewCampaignModalProps {
   isOpen: boolean;
@@ -32,6 +32,17 @@ const steps = [
   { id: 3, name: 'Público' },
   { id: 4, name: 'Revisão' },
 ];
+
+const step1Schema = z.object({
+  campaignName: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
+  objective: z.string().min(1, "Selecione um objetivo."),
+  platform: z.string().min(1, "Selecione uma plataforma."),
+});
+const step2Schema = z.object({
+  dailyBudget: z.number().positive("O orçamento diário deve ser positivo."),
+  totalBudget: z.number().positive("O orçamento total deve ser positivo."),
+  dateRange: z.object({ from: z.date(), to: z.date().optional() }).refine(data => data.from, "Selecione uma data de início."),
+});
 
 export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOpenChange }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -49,9 +60,56 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
   const [targetAge, setTargetAge] = useState('18-65+');
   const [interests, setInterests] = useState<string[]>([]);
   const [interestInput, setInterestInput] = useState('');
+  const [errors, setErrors] = useState<any>({});
 
+  useEffect(() => {
+    // Reset state when modal opens/closes
+    if (!isOpen) {
+      setTimeout(() => {
+        setCurrentStep(1);
+        setCampaignName('');
+        setObjective('');
+        setPlatform('');
+        setDailyBudget('');
+        setTotalBudget('');
+        setDateRange({ from: undefined, to: undefined });
+        setErrors({});
+      }, 300);
+    }
+  }, [isOpen]);
 
-  const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+  const validateStep = () => {
+    let schema;
+    let data: any = {};
+    setErrors({});
+
+    if (currentStep === 1) {
+      schema = step1Schema;
+      data = { campaignName, objective, platform };
+    } else if (currentStep === 2) {
+      schema = step2Schema;
+      data = { dailyBudget: parseFloat(dailyBudget), totalBudget: parseFloat(totalBudget), dateRange };
+    }
+
+    if (schema) {
+      const result = schema.safeParse(data);
+      if (!result.success) {
+        const newErrors: any = {};
+        result.error.errors.forEach(err => {
+          newErrors[err.path[0]] = err.message;
+        });
+        setErrors(newErrors);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep()) {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+    }
+  };
   const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
   
   const handleAddInterest = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -77,14 +135,10 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
         description: `A campanha "${campaignName}" foi salva e está pronta para ser lançada.`,
         variant: "default",
       });
-      // Reset state after closing
-      setTimeout(() => {
-        setCurrentStep(1);
-        setCampaignName('');
-        // ... reset other fields
-      }, 300);
     }, 1500);
   };
+
+  const renderError = (field: string) => errors[field] && <p className="text-xs text-destructive mt-1">{errors[field]}</p>;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -121,6 +175,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
               <div className="grid gap-2">
                 <Label htmlFor="campaign-name">Nome da Campanha</Label>
                 <Input id="campaign-name" value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Ex: Lançamento de Inverno" />
+                {renderError('campaignName')}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="objective">Objetivo</Label>
@@ -132,6 +187,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
                     <SelectItem value="brand-awareness">Reconhecimento de Marca</SelectItem>
                   </SelectContent>
                 </Select>
+                {renderError('objective')}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="platform">Plataforma</Label>
@@ -143,6 +199,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
                     <SelectItem value="LinkedIn">LinkedIn</SelectItem>
                   </SelectContent>
                 </Select>
+                {renderError('platform')}
               </div>
             </div>
           )}
@@ -152,10 +209,12 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
                 <div className="grid gap-2">
                   <Label htmlFor="daily-budget">Orçamento Diário (R$)</Label>
                   <Input id="daily-budget" type="number" value={dailyBudget} onChange={e => setDailyBudget(e.target.value)} placeholder="50.00" />
+                  {renderError('dailyBudget')}
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="total-budget">Orçamento Total (R$)</Label>
                   <Input id="total-budget" type="number" value={totalBudget} onChange={e => setTotalBudget(e.target.value)} placeholder="1000.00" />
+                  {renderError('totalBudget')}
                 </div>
               </div>
               <div className="grid gap-2">
@@ -194,6 +253,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
                     />
                   </PopoverContent>
                 </Popover>
+                {renderError('dateRange')}
               </div>
             </div>
           )}

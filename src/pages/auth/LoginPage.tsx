@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bot, Github } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useStore } from '@/store/useStore';
+import React from 'react';
 
 // Mock Google Icon
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -20,6 +22,20 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const login = useStore((state) => state.login);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    login({
+      name: 'Usuário Teste',
+      email: 'usuario@email.com',
+      avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+      plan: 'Pro'
+    });
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-md">
@@ -32,24 +48,26 @@ export default function LoginPage() {
           <CardDescription>Insira suas credenciais para acessar sua conta.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="nome@exemplo.com" required />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Link to="#" className="ml-auto inline-block text-sm underline">
-                  Esqueceu sua senha?
-                </Link>
+          <form onSubmit={handleLogin}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="nome@exemplo.com" defaultValue="usuario@email.com" required />
               </div>
-              <Input id="password" type="password" required />
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link to="/forgot-password" className="ml-auto inline-block text-sm underline">
+                    Esqueceu sua senha?
+                  </Link>
+                </div>
+                <Input id="password" type="password" defaultValue="password" required />
+              </div>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
             </div>
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-          </div>
+          </form>
           <Separator className="my-6" />
           <div className="grid grid-cols-2 gap-4">
             <Button variant="outline">
