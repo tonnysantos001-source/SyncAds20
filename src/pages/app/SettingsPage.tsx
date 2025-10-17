@@ -1,10 +1,11 @@
 import React from 'react';
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { Routes, Route, NavLink } from 'react-router-dom';
 import { ProfileTab } from './settings/ProfileTab';
 import { SecurityTab } from './settings/SecurityTab';
 import { NotificationsTab } from './settings/NotificationsTab';
 import { BillingTab } from './settings/BillingTab';
 import { ApiKeysTab } from './settings/ApiKeysTab';
+import { AiTab } from './settings/AiTab';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -14,12 +15,10 @@ const settingsNav = [
   { path: 'notifications', label: 'Notificações' },
   { path: 'billing', label: 'Faturamento' },
   { path: 'api-keys', label: 'Chaves de API' },
+  { path: 'ai', label: 'Personalidade IA' },
 ];
 
 const SettingsPage: React.FC = () => {
-  const location = useLocation();
-  const currentPath = location.pathname.split('/settings/')[1] || '';
-
   return (
     <div className="space-y-6">
       <div>
@@ -27,23 +26,26 @@ const SettingsPage: React.FC = () => {
         <p className="text-muted-foreground">Gerencie as configurações da sua conta e preferências.</p>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
-        <nav className="flex flex-row md:flex-col items-start w-full md:w-1/5 shrink-0 gap-1">
-          {settingsNav.map(item => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === ''}
-              className={({ isActive }) =>
-                cn(
-                  buttonVariants({ variant: 'ghost' }),
-                  'w-full justify-start',
-                  isActive && 'bg-muted hover:bg-muted'
-                )
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        <nav className="flex flex-row md:flex-col items-start w-full md:w-1/5 shrink-0 gap-1 overflow-x-auto pb-2 md:pb-0">
+          {settingsNav.map(item => {
+            const targetPath = item.path ? `/settings/${item.path}` : '/settings';
+            return (
+              <NavLink
+                key={item.path}
+                to={targetPath}
+                end={item.path === ''}
+                className={({ isActive }) =>
+                  cn(
+                    buttonVariants({ variant: 'ghost' }),
+                    'w-full justify-start shrink-0',
+                    isActive && 'bg-muted hover:bg-muted'
+                  )
+                }
+              >
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
         <div className="flex-1">
           <Routes>
@@ -52,6 +54,7 @@ const SettingsPage: React.FC = () => {
             <Route path="notifications" element={<NotificationsTab />} />
             <Route path="billing" element={<BillingTab />} />
             <Route path="api-keys" element={<ApiKeysTab />} />
+            <Route path="ai" element={<AiTab />} />
           </Routes>
         </div>
       </div>

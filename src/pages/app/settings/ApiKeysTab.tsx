@@ -10,7 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 export const ApiKeysTab: React.FC = () => {
   const { toast } = useToast();
-  const { apiKeys, addApiKey, deleteApiKey } = useStore();
+  const apiKeys = useStore(state => state.apiKeys);
+  const addApiKey = useStore(state => state.addApiKey);
+  const deleteApiKey = useStore(state => state.deleteApiKey);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 

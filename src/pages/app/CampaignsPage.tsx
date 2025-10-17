@@ -124,7 +124,8 @@ const CampaignCard: React.FC<{ campaign: Campaign; onEdit: (campaign: Campaign) 
 };
 
 const CampaignsPage: React.FC = () => {
-  const { campaigns, searchTerm } = useStore(state => ({ campaigns: state.campaigns, searchTerm: state.searchTerm }));
+  const campaigns = useStore(state => state.campaigns);
+  const searchTerm = useStore(state => state.searchTerm);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'Todas'>('Todas');
   const [platformFilter, setPlatformFilter] = useState<CampaignPlatform | 'Todas'>('Todas');
   const [currentPage, setCurrentPage] = useState(1);

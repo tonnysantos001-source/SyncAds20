@@ -16,7 +16,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useStore } from '@/store/useStore';
 import { Campaign } from '@/data/mocks';
-import { Loader2 } from 'lucide-react';
 
 interface EditCampaignModalProps {
   isOpen: boolean;
@@ -93,8 +92,7 @@ export const EditCampaignModal: React.FC<EditCampaignModalProps> = ({ isOpen, on
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" loading={isSaving}>
               Salvar Alterações
             </Button>
           </DialogFooter>

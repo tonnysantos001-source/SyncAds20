@@ -33,7 +33,7 @@ interface AppState {
   setSearchTerm: (term: string) => void;
 
   // Integrations
-  connectedIntegrations: Set<IntegrationId>;
+  connectedIntegrations: IntegrationId[];
   toggleIntegration: (id: IntegrationId, connect: boolean) => void;
 
   // Chat
@@ -55,6 +55,10 @@ interface AppState {
   apiKeys: ApiKey[];
   addApiKey: () => string;
   deleteApiKey: (id: string) => void;
+
+  // AI Settings
+  aiSystemPrompt: string;
+  setAiSystemPrompt: (prompt: string) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -70,7 +74,7 @@ export const useStore = create<AppState>()(
           user: null, 
           campaigns: initialCampaigns,
           apiKeys: initialApiKeys,
-          connectedIntegrations: new Set(['google-analytics', 'github']),
+          connectedIntegrations: ['google-analytics', 'github'],
           searchTerm: '',
         });
       },
@@ -83,15 +87,17 @@ export const useStore = create<AppState>()(
       setSearchTerm: (term) => set({ searchTerm: term }),
 
       // Integrations
-      connectedIntegrations: new Set(['google-analytics', 'github']),
+      connectedIntegrations: ['google-analytics', 'github'],
       toggleIntegration: (id, connect) => set((state) => {
-        const newSet = new Set(state.connectedIntegrations);
+        const currentIntegrations = Array.isArray(state.connectedIntegrations) ? state.connectedIntegrations : [];
         if (connect) {
-          newSet.add(id);
+          if (!currentIntegrations.includes(id)) {
+            return { connectedIntegrations: [...currentIntegrations, id] };
+          }
         } else {
-          newSet.delete(id);
+          return { connectedIntegrations: currentIntegrations.filter(i => i !== id) };
         }
-        return { connectedIntegrations: newSet };
+        return {}; // No change
       }),
 
       // Chat
@@ -141,22 +147,27 @@ export const useStore = create<AppState>()(
       deleteApiKey: (id) => set((state) => ({
         apiKeys: state.apiKeys.filter(key => key.id !== id),
       })),
+
+      // AI Settings
+      aiSystemPrompt: 'Você é o SyncAds AI, um assistente de marketing digital especializado em otimização de campanhas. Seja proativo, criativo e forneça insights baseados em dados. Suas respostas devem ser claras, concisas e sempre focadas em ajudar o usuário a atingir seus objetivos de marketing.',
+      setAiSystemPrompt: (prompt) => set({ aiSystemPrompt: prompt }),
     }),
     {
       name: 'marketing-ai-storage',
       storage: createJSONStorage(() => localStorage),
-      merge: (persistedState, currentState) => {
-        const state = { ...currentState, ...(persistedState as object) };
-        if ((persistedState as AppState)?.connectedIntegrations) {
-          state.connectedIntegrations = new Set((persistedState as AppState).connectedIntegrations);
-        }
-        return state;
-      },
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,
         connectedIntegrations: state.connectedIntegrations,
+        aiSystemPrompt: state.aiSystemPrompt,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          if (!Array.isArray(state.connectedIntegrations)) {
+            state.connectedIntegrations = ['google-analytics', 'github'];
+          }
+        }
+      },
     }
   )
 );

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -14,7 +14,7 @@ import { chartData } from '@/data/mocks';
 export const DashboardChart: React.FC = () => {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart
+      <LineChart
         data={chartData}
         margin={{
           top: 5,
@@ -39,7 +39,7 @@ export const DashboardChart: React.FC = () => {
           tickFormatter={(value) => `${value / 1000}k`}
         />
         <Tooltip 
-          cursor={{fill: 'hsl(var(--muted))'}}
+          cursor={{stroke: 'hsl(var(--border))', strokeWidth: 2, strokeDasharray: '3 3'}}
           contentStyle={{
             backgroundColor: "hsl(var(--background))",
             borderColor: "hsl(var(--border))",
@@ -50,17 +50,23 @@ export const DashboardChart: React.FC = () => {
           iconType="circle"
           iconSize={10}
         />
-        <Bar
+        <Line
+          type="monotone"
           dataKey="Cliques"
-          fill="#3B82F6"
-          radius={[4, 4, 0, 0]}
+          stroke="#3B82F6"
+          strokeWidth={2}
+          dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+          activeDot={{ r: 6 }}
         />
-        <Bar 
+        <Line 
+          type="monotone"
           dataKey="Conversoes" 
-          fill="#8B5CF6"
-          radius={[4, 4, 0, 0]}
+          stroke="#8B5CF6"
+          strokeWidth={2}
+          dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+          activeDot={{ r: 6 }}
         />
-      </BarChart>
+      </LineChart>
     </ResponsiveContainer>
   );
 };

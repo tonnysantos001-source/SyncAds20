@@ -2,16 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Paperclip, Send, User, Bot, CornerDownLeft, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Paperclip, Send, User, Bot, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import Textarea from 'react-textarea-autosize';
 import { useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const quickSuggestions = [
   "Criar campanha de Facebook Ads",
   "Analisar performance da última semana",
   "Sugerir otimizações"
 ];
+
+const MAX_CHARS = 500;
 
 const ChatPage: React.FC = () => {
   const [input, setInput] = useState('');
@@ -33,7 +36,7 @@ const ChatPage: React.FC = () => {
   useEffect(scrollToBottom, [activeConversation?.messages, isAssistantTyping]);
 
   const handleSend = () => {
-    if (input.trim() === '' || !activeConversationId) return;
+    if (input.trim() === '' || !activeConversationId || input.length > MAX_CHARS) return;
 
     addMessage(activeConversationId, { id: `msg-${Date.now()}`, role: 'user', content: input });
     setInput('');
@@ -50,9 +53,9 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-100px)]">
+    <div className="flex h-full">
       {/* Conversations Sidebar */}
-      <Card className={cn("transition-all duration-300 ease-in-out", sidebarOpen ? "w-1/4 min-w-[250px]" : "w-0 min-w-0 opacity-0")}>
+      <Card className={cn("transition-all duration-300 ease-in-out hidden sm:block border-0", sidebarOpen ? "w-1/4 min-w-[250px]" : "w-0 min-w-0 opacity-0")}>
         <CardContent className="p-2 h-full overflow-y-auto">
           <h2 className="text-lg font-semibold p-2">Conversas</h2>
           <div className="space-y-1">
@@ -71,12 +74,21 @@ const ChatPage: React.FC = () => {
       </Card>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col pl-4">
-        <Card className="flex-1 flex flex-col">
-          <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-            <Button variant="ghost" size="icon" className="absolute top-20 left-2" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
-            </Button>
+      <div className="flex-1 flex flex-col sm:pl-4 h-full">
+        <Card className="flex-1 flex flex-col overflow-hidden rounded-none sm:rounded-2xl border-0">
+          <div className="flex-1 p-4 sm:p-6 space-y-4 overflow-y-auto">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="absolute top-20 left-2 hidden sm:flex" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                    {sidebarOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{sidebarOpen ? 'Fechar painel' : 'Abrir painel'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {activeConversation ? (
               <>
                 {activeConversation.messages.map((message) => (
@@ -86,8 +98,8 @@ const ChatPage: React.FC = () => {
                         <AvatarFallback><Bot size={18} /></AvatarFallback>
                       </Avatar>
                     )}
-                    <div className={`rounded-lg p-3 max-w-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                      <p className="text-sm">{message.content}</p>
+                    <div className={`rounded-2xl p-3 max-w-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                     {message.role === 'user' && (
                       <Avatar className="h-8 w-8">
@@ -101,7 +113,7 @@ const ChatPage: React.FC = () => {
                     <Avatar className="h-8 w-8">
                       <AvatarFallback><Bot size={18} /></AvatarFallback>
                     </Avatar>
-                    <div className="rounded-lg p-3 bg-muted flex items-center space-x-1">
+                    <div className="rounded-2xl p-3 bg-muted flex items-center space-x-1">
                       <span className="h-2 w-2 bg-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                       <span className="h-2 w-2 bg-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                       <span className="h-2 w-2 bg-foreground rounded-full animate-bounce"></span>
@@ -117,8 +129,8 @@ const ChatPage: React.FC = () => {
             )}
           </div>
           
-          <div className="p-4 border-t">
-            <div className="flex gap-2 mb-2">
+          <div className="p-2 sm:p-4 border-t bg-card/50 backdrop-blur-sm">
+            <div className="hidden sm:flex gap-2 mb-2">
               {quickSuggestions.map(s => (
                 <Button key={s} variant="outline" size="sm" onClick={() => handleSuggestionClick(s)}>
                   {s}
@@ -135,20 +147,24 @@ const ChatPage: React.FC = () => {
                     handleSend();
                   }
                 }}
-                placeholder="Digite sua mensagem ou use 'Shift + Enter' para uma nova linha..."
-                className="w-full resize-none rounded-lg border p-2 pr-28 min-h-[40px]"
+                placeholder="Digite sua mensagem..."
+                className="w-full resize-none rounded-lg border bg-background p-3 pr-24 min-h-[48px]"
                 minRows={1}
                 maxRows={5}
+                maxLength={MAX_CHARS}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                 <Button type="button" size="icon" variant="ghost">
-                  <Paperclip className="h-4 w-4" />
+                  <Paperclip className="h-5 w-5" />
                 </Button>
-                <Button type="submit" size="icon" onClick={handleSend}>
-                  <Send className="h-4 w-4" />
+                <Button type="submit" size="icon" onClick={handleSend} disabled={input.trim() === ''}>
+                  <Send className="h-5 w-5" />
                 </Button>
               </div>
             </div>
+             <p className={cn("text-xs text-right mt-1 sm:hidden", input.length > MAX_CHARS ? "text-destructive" : "text-muted-foreground")}>
+                {input.length} / {MAX_CHARS}
+            </p>
           </div>
         </Card>
       </div>

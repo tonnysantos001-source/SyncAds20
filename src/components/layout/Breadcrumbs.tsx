@@ -15,6 +15,7 @@ const breadcrumbNameMap: { [key: string]: string } = {
   '/settings/notifications': 'Notificações',
   '/settings/billing': 'Faturamento',
   '/settings/api-keys': 'Chaves de API',
+  '/settings/ai': 'Personalidade IA',
 };
 
 const Breadcrumbs: React.FC = () => {

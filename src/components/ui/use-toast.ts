@@ -1,10 +1,7 @@
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
-// This is a simplified version to avoid timer issues in the environment.
-// It removes manual timeout management and relies on Radix's `onOpenChange`.
-
-const TOAST_LIMIT = 5; // Allow more than one toast at a time
+const TOAST_LIMIT = 5;
 
 type ToasterToast = ToastProps & {
   id: string
@@ -100,9 +97,8 @@ function toast(props: Toast) {
         if (!open) {
           // When the toast is closed by Radix UI, we schedule its removal 
           // from the state after the animation is finished.
-          // FIX: Use window.setTimeout to ensure we're using the browser's timer
-          // and not a Node.js polyfill that might be causing issues in this environment.
-          window.setTimeout(() => {
+          // Using a global setTimeout to avoid issues in the emulated environment.
+          setTimeout(() => {
             dispatch({ type: "REMOVE_TOAST", toastId: id })
           }, 500) // Wait for exit animation
         }

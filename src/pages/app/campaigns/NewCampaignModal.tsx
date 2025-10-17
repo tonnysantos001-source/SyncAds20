@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, CheckCircle, Loader2, X } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle, X } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -108,6 +108,10 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
         impressions: 0,
         clicks: 0,
         conversions: 0,
+        startDate: data.dateRange.from.toISOString(),
+        endDate: data.dateRange.to.toISOString(),
+        ctr: 0,
+        cpc: 0,
       };
       addCampaign(newCampaign);
       setIsSaving(false);
@@ -290,8 +294,7 @@ export const NewCampaignModal: React.FC<NewCampaignModalProps> = ({ isOpen, onOp
           {currentStep > 1 && <Button variant="outline" onClick={handleBack}>Voltar</Button>}
           {currentStep < steps.length && <Button onClick={handleNext}>Próximo</Button>}
           {currentStep === steps.length && (
-            <Button onClick={form.handleSubmit(onSubmit)} disabled={isSaving || !isValid}>
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={form.handleSubmit(onSubmit)} loading={isSaving} disabled={!isValid}>
               Salvar Campanha
             </Button>
           )}

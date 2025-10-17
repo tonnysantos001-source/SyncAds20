@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
 
 export const ProfileTab: React.FC = () => {
-  const { user, updateUser } = useStore();
+  const user = useStore(state => state.user);
+  const updateUser = useStore(state => state.updateUser);
   const { toast } = useToast();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -67,8 +67,7 @@ export const ProfileTab: React.FC = () => {
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Button onClick={handleSave} loading={isSaving}>
           Salvar Alterações
         </Button>
       </CardFooter>

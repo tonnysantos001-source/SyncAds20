@@ -7,13 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }) => {
-  const { connectedIntegrations, toggleIntegration } = useStore();
+  const connectedIntegrations = useStore(state => state.connectedIntegrations);
+  const toggleIntegration = useStore(state => state.toggleIntegration);
   const { toast } = useToast();
-  const isConnected = connectedIntegrations.has(integration.id);
+  const isConnected = connectedIntegrations.includes(integration.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -78,8 +78,7 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleConnect} disabled={isConnecting}>
-              {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleConnect} loading={isConnecting}>
               Conectar
             </Button>
           </DialogFooter>
