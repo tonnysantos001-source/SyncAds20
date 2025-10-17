@@ -1,4 +1,4 @@
-import { Megaphone, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Megaphone, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 export type Notification = {
   id: string;
@@ -40,6 +40,14 @@ export const mockNotifications: Notification[] = [
     title: 'Integração Conectada',
     description: 'Sua conta do Google Analytics foi conectada com sucesso.',
     time: 'Ontem',
+    read: true,
+  },
+  {
+    id: 'notif-5',
+    icon: Info,
+    title: 'Atualização da Plataforma',
+    description: 'Novos recursos de análise de ROI foram adicionados à página de Analytics.',
+    time: '2 dias atrás',
     read: true,
   },
 ];

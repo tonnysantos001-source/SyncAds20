@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Filter, View } from 'lucide-react';
+import { PlusCircle, Filter, View, Loader2 } from 'lucide-react';
 import { Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit, Play, Pause, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/Pagination';
 import { NewCampaignModal } from './campaigns/NewCampaignModal';
 import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/use-toast';
@@ -33,6 +32,7 @@ const CampaignCard: React.FC<{ campaign: Campaign; onEdit: (campaign: Campaign) 
     toast({
       title: 'Status da Campanha Atualizado!',
       description: `A campanha "${campaign.name}" foi ${newStatus.toLowerCase()}.`,
+      variant: 'info'
     });
   };
 
@@ -128,11 +128,13 @@ const CampaignsPage: React.FC = () => {
   const searchTerm = useStore(state => state.searchTerm);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'Todas'>('Todas');
   const [platformFilter, setPlatformFilter] = useState<CampaignPlatform | 'Todas'>('Todas');
-  const [currentPage, setCurrentPage] = useState(1);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
-  const itemsPerPage = 6;
+  
+  const ITEMS_PER_PAGE = 6;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const handleEditClick = (campaign: Campaign) => {
     setEditingCampaign(campaign);
@@ -148,8 +150,16 @@ const CampaignsPage: React.FC = () => {
     });
   }, [statusFilter, platformFilter, campaigns, searchTerm]);
 
-  const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
-  const paginatedCampaigns = filteredCampaigns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount(prevCount => prevCount + ITEMS_PER_PAGE);
+      setIsLoadingMore(false);
+    }, 500);
+  };
+  
+  const paginatedCampaigns = filteredCampaigns.slice(0, visibleCount);
+  const canLoadMore = visibleCount < filteredCampaigns.length;
 
   return (
     <>
@@ -215,24 +225,19 @@ const CampaignsPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.max(1, p - 1)); }} />
-              </PaginationItem>
-              {[...Array(totalPages)].map((_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink href="#" isActive={currentPage === i + 1} onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1); }}>
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.min(totalPages, p + 1)); }} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+        {canLoadMore && (
+          <div className="flex justify-center">
+            <Button onClick={handleLoadMore} variant="outline" disabled={isLoadingMore}>
+              {isLoadingMore ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Carregando...
+                </>
+              ) : (
+                'Carregar Mais'
+              )}
+            </Button>
+          </div>
         )}
       </div>
     </>

@@ -25,6 +25,7 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
       toast({
         title: "Integração Desconectada",
         description: `${integration.name} foi desconectado com sucesso.`,
+        variant: "warning",
       });
     }
   };
@@ -38,7 +39,7 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
       toast({
         title: "Integração Conectada!",
         description: `${integration.name} foi conectado com sucesso.`,
-        variant: "default",
+        variant: "success",
       });
     }, 1000);
   };

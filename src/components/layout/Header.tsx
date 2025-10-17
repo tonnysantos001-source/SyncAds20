@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/landing');
   };
   
   const unreadCount = mockNotifications.filter(n => !n.read).length;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Trash2, PlusCircle, Check } from 'lucide-react';
+import { Copy, Trash2, PlusCircle, Check, KeyRound } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useStore } from '@/store/useStore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -18,7 +18,7 @@ export const ApiKeysTab: React.FC = () => {
 
   const handleCopy = (key: string) => {
     navigator.clipboard.writeText(key);
-    toast({ title: "Chave de API copiada!" });
+    toast({ title: "Chave de API copiada!", variant: 'info' });
   };
   
   const handleCopyNewKey = () => {
@@ -66,37 +66,49 @@ export const ApiKeysTab: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {apiKeys.map((apiKey) => (
-                <TableRow key={apiKey.id}>
-                  <TableCell className="font-mono">{apiKey.key.substring(0, 15)}...</TableCell>
-                  <TableCell>{apiKey.createdAt}</TableCell>
-                  <TableCell>{apiKey.lastUsed}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleCopy(apiKey.key)}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Revogar chave de API?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. A chave será permanentemente deletada.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleRevoke(apiKey.id)} className="bg-destructive hover:bg-destructive/90">Revogar</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+              {apiKeys.length > 0 ? (
+                apiKeys.map((apiKey) => (
+                  <TableRow key={apiKey.id}>
+                    <TableCell className="font-mono">{apiKey.key.substring(0, 15)}...</TableCell>
+                    <TableCell>{apiKey.createdAt}</TableCell>
+                    <TableCell>{apiKey.lastUsed}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleCopy(apiKey.key)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Revogar chave de API?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. A chave será permanentemente deletada.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleRevoke(apiKey.id)} className="bg-destructive hover:bg-destructive/90">Revogar</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <KeyRound className="h-8 w-8" />
+                      <p>Nenhuma chave de API gerada.</p>
+                      <p className="text-xs">Clique em "Gerar Nova Chave" para começar.</p>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

@@ -32,6 +32,12 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success:
+          "success group border-success/50 bg-success/10 text-success-foreground",
+        warning:
+          "warning group border-warning/50 bg-warning/10 text-warning-foreground",
+        info:
+          "info group border-info/50 bg-info/10 text-info-foreground",
       },
     },
     defaultVariants: {
@@ -62,7 +68,11 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      "group-[.success]:hover:bg-success/20 group-[.success]:border-success/30 group-[.success]:text-success-foreground",
+      "group-[.warning]:hover:bg-warning/20 group-[.warning]:border-warning/30 group-[.warning]:text-warning-foreground",
+      "group-[.info]:hover:bg-info/20 group-[.info]:border-info/30 group-[.info]:text-info-foreground",
       className
     )}
     {...props}
@@ -77,7 +87,11 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100",
+      "group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "group-[.success]:text-green-400 group-[.success]:hover:text-green-600",
+      "group-[.warning]:text-amber-400 group-[.warning]:hover:text-amber-600",
+      "group-[.info]:text-blue-400 group-[.info]:hover:text-blue-600",
       className
     )}
     toast-close=""
@@ -94,7 +108,13 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("text-sm font-semibold", 
+      "group-[.destructive]:text-white",
+      "group-[.success]:text-green-600 dark:group-[.success]:text-green-400",
+      "group-[.warning]:text-amber-600 dark:group-[.warning]:text-amber-400",
+      "group-[.info]:text-blue-600 dark:group-[.info]:text-blue-400",
+      className
+    )}
     {...props}
   />
 ))
@@ -106,7 +126,13 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90", className)}
+    className={cn("text-sm opacity-90", 
+      "group-[.destructive]:text-white/90",
+      "group-[.success]:text-green-800/90 dark:group-[.success]:text-green-300/90",
+      "group-[.warning]:text-amber-800/90 dark:group-[.warning]:text-amber-300/90",
+      "group-[.info]:text-blue-800/90 dark:group-[.info]:text-blue-300/90",
+      className
+    )}
     {...props}
   />
 ))

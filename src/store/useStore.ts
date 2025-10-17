@@ -18,13 +18,14 @@ interface User {
   name: string;
   email: string;
   avatarUrl: string;
+  plan: 'Free' | 'Pro' | 'Enterprise';
 }
 
 interface AppState {
   // Auth
   isAuthenticated: boolean;
   user: User | null;
-  login: (user: User) => void;
+  login: (user: Omit<User, 'plan'>) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
 
@@ -67,7 +68,7 @@ export const useStore = create<AppState>()(
       // Auth
       isAuthenticated: false,
       user: null,
-      login: (user) => set({ isAuthenticated: true, user }),
+      login: (userData) => set({ isAuthenticated: true, user: { ...userData, plan: 'Pro' } }),
       logout: () => {
         set({ 
           isAuthenticated: false, 
