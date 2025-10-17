@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }) => {
   const { connectedIntegrations, toggleIntegration } = useStore();
+  const { toast } = useToast();
   const isConnected = connectedIntegrations.has(integration.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -20,6 +22,10 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
       setIsModalOpen(true);
     } else {
       toggleIntegration(integration.id, false);
+      toast({
+        title: "Integração Desconectada",
+        description: `${integration.name} foi desconectado com sucesso.`,
+      });
     }
   };
 
@@ -29,6 +35,11 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
       toggleIntegration(integration.id, true);
       setIsConnecting(false);
       setIsModalOpen(false);
+      toast({
+        title: "Integração Conectada!",
+        description: `${integration.name} foi conectado com sucesso.`,
+        variant: "default",
+      });
     }, 1000);
   };
 
@@ -44,7 +55,7 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
               <CardTitle className="text-lg">{integration.name}</CardTitle>
             </div>
           </div>
-          <Switch checked={isConnected} onCheckedChange={handleToggle} />
+          <Switch checked={isConnected} onCheckedChange={handleToggle} aria-label={`Conectar ${integration.name}`} />
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{integration.description}</p>

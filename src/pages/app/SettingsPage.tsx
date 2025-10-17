@@ -1,35 +1,60 @@
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { ProfileTab } from './settings/ProfileTab';
 import { SecurityTab } from './settings/SecurityTab';
 import { NotificationsTab } from './settings/NotificationsTab';
 import { BillingTab } from './settings/BillingTab';
 import { ApiKeysTab } from './settings/ApiKeysTab';
 import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
+
+const settingsNav = [
+  { path: '', label: 'Perfil' },
+  { path: 'security', label: 'Segurança' },
+  { path: 'notifications', label: 'Notificações' },
+  { path: 'billing', label: 'Faturamento' },
+  { path: 'api-keys', label: 'Chaves de API' },
+];
 
 const SettingsPage: React.FC = () => {
+  const location = useLocation();
+  const currentPath = location.pathname.split('/settings/')[1] || '';
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">Gerencie as configurações da sua conta e preferências.</p>
       </div>
-      <Tabs defaultValue="profile" orientation="vertical" className="flex flex-col md:flex-row gap-8">
-        <TabsList className="flex flex-row md:flex-col items-start h-auto w-full md:w-1/5 shrink-0 bg-transparent p-0 gap-1">
-          <TabsTrigger value="profile" className={cn("w-full justify-start")}>Perfil</TabsTrigger>
-          <TabsTrigger value="security" className={cn("w-full justify-start")}>Segurança</TabsTrigger>
-          <TabsTrigger value="notifications" className={cn("w-full justify-start")}>Notificações</TabsTrigger>
-          <TabsTrigger value="billing" className={cn("w-full justify-start")}>Faturamento</TabsTrigger>
-          <TabsTrigger value="api-keys" className={cn("w-full justify-start")}>Chaves de API</TabsTrigger>
-        </TabsList>
+      <div className="flex flex-col md:flex-row gap-8">
+        <nav className="flex flex-row md:flex-col items-start w-full md:w-1/5 shrink-0 gap-1">
+          {settingsNav.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === ''}
+              className={({ isActive }) =>
+                cn(
+                  buttonVariants({ variant: 'ghost' }),
+                  'w-full justify-start',
+                  isActive && 'bg-muted hover:bg-muted'
+                )
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
         <div className="flex-1">
-          <TabsContent value="profile" className="mt-0"><ProfileTab /></TabsContent>
-          <TabsContent value="security" className="mt-0"><SecurityTab /></TabsContent>
-          <TabsContent value="notifications" className="mt-0"><NotificationsTab /></TabsContent>
-          <TabsContent value="billing" className="mt-0"><BillingTab /></TabsContent>
-          <TabsContent value="api-keys" className="mt-0"><ApiKeysTab /></TabsContent>
+          <Routes>
+            <Route index element={<ProfileTab />} />
+            <Route path="security" element={<SecurityTab />} />
+            <Route path="notifications" element={<NotificationsTab />} />
+            <Route path="billing" element={<BillingTab />} />
+            <Route path="api-keys" element={<ApiKeysTab />} />
+          </Routes>
         </div>
-      </Tabs>
+      </div>
     </div>
   );
 };

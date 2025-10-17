@@ -22,16 +22,16 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function LoginPage() {
+  const { login } = useStore();
   const navigate = useNavigate();
-  const login = useStore((state) => state.login);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Em um app real, você validaria as credenciais aqui
     login({
       name: 'Usuário Teste',
       email: 'usuario@email.com',
-      avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-      plan: 'Pro'
+      avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
     });
     navigate('/dashboard');
   };
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <CardDescription>Insira suas credenciais para acessar sua conta.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>

@@ -54,11 +54,6 @@ module.exports = {
         success: "#10B981",
         warning: "#F59E0B",
         danger: "#EF4444",
-        cyan: {
-          DEFAULT: "#06b6d4",
-          500: "#06b6d4",
-          foreground: "#ffffff",
-        }
       },
       borderRadius: {
         lg: "var(--radius)",

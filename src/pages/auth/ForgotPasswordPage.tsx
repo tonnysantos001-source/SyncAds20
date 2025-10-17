@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bot, ArrowLeft } from 'lucide-react';
+import { Bot } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
           </div>
           <CardTitle className="text-2xl">Esqueceu sua senha?</CardTitle>
           <CardDescription>
-            Sem problemas. Insira seu email e enviaremos um link para redefinir sua senha.
+            Sem problemas. Insira seu email e enviaremos um link para você resetar sua senha.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -27,13 +27,13 @@ export default function ForgotPasswordPage() {
               <Input id="email" type="email" placeholder="nome@exemplo.com" required />
             </div>
             <Button type="submit" className="w-full">
-              Enviar link de redefinição
+              Enviar Link de Recuperação
             </Button>
           </div>
           <div className="mt-6 text-center text-sm">
-            <Link to="/login" className="underline flex items-center justify-center gap-1">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar para o Login
+            Lembrou sua senha?{' '}
+            <Link to="/login" className="underline">
+              Fazer Login
             </Link>
           </div>
         </CardContent>

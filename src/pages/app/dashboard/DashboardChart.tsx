@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,8 +13,8 @@ import { chartData } from '@/data/mocks';
 
 export const DashboardChart: React.FC = () => {
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <LineChart
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart
         data={chartData}
         margin={{
           top: 5,
@@ -23,7 +23,7 @@ export const DashboardChart: React.FC = () => {
           bottom: 5,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
         <XAxis 
           dataKey="name" 
           stroke="hsl(var(--muted-foreground))"
@@ -36,30 +36,31 @@ export const DashboardChart: React.FC = () => {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value}`}
+          tickFormatter={(value) => `${value / 1000}k`}
         />
         <Tooltip 
+          cursor={{fill: 'hsl(var(--muted))'}}
           contentStyle={{
             backgroundColor: "hsl(var(--background))",
-            borderColor: "hsl(var(--border))"
+            borderColor: "hsl(var(--border))",
+            borderRadius: "var(--radius)"
           }}
         />
-        <Legend />
-        <Line
-          type="monotone"
+        <Legend
+          iconType="circle"
+          iconSize={10}
+        />
+        <Bar
           dataKey="Cliques"
-          stroke="hsl(var(--primary))"
-          strokeWidth={2}
-          dot={false}
+          fill="#3B82F6"
+          radius={[4, 4, 0, 0]}
         />
-        <Line 
-          type="monotone" 
+        <Bar 
           dataKey="Conversoes" 
-          stroke="hsl(var(--secondary))" 
-          strokeWidth={2}
-          dot={false}
+          fill="#8B5CF6"
+          radius={[4, 4, 0, 0]}
         />
-      </LineChart>
+      </BarChart>
     </ResponsiveContainer>
   );
 };

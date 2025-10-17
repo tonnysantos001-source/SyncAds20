@@ -1,16 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Filter, X } from 'lucide-react';
-import { allCampaigns, Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
+import { PlusCircle, Filter } from 'lucide-react';
+import { Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Edit, Play, Pause, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/Pagination';
 import { NewCampaignModal } from './campaigns/NewCampaignModal';
+import { useStore } from '@/store/useStore';
+import { useToast } from '@/components/ui/use-toast';
 
 const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'> = {
   'Ativa': 'success',
@@ -19,7 +21,27 @@ const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'
 };
 
 const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
+  const { updateCampaignStatus, deleteCampaign } = useStore();
+  const { toast } = useToast();
   const budgetPercentage = (campaign.budgetSpent / campaign.budgetTotal) * 100;
+
+  const handleStatusChange = () => {
+    const newStatus = campaign.status === 'Ativa' ? 'Pausada' : 'Ativa';
+    updateCampaignStatus(campaign.id, newStatus);
+    toast({
+      title: 'Status da Campanha Atualizado!',
+      description: `A campanha "${campaign.name}" foi ${newStatus.toLowerCase()}.`,
+    });
+  };
+
+  const handleDelete = () => {
+    deleteCampaign(campaign.id);
+    toast({
+      title: 'Campanha Deletada!',
+      description: `A campanha "${campaign.name}" foi deletada com sucesso.`,
+      variant: 'destructive',
+    });
+  };
 
   return (
     <Card>
@@ -64,11 +86,14 @@ const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
-                {campaign.status === 'Ativa' ? (
-                  <DropdownMenuItem><Pause className="mr-2 h-4 w-4" /> Pausar</DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem><Play className="mr-2 h-4 w-4" /> Ativar</DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={handleStatusChange}>
+                  {campaign.status === 'Ativa' ? (
+                    <><Pause className="mr-2 h-4 w-4" /> Pausar</>
+                  ) : (
+                    <><Play className="mr-2 h-4 w-4" /> Ativar</>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
                     <Trash2 className="mr-2 h-4 w-4" /> Deletar
@@ -85,7 +110,7 @@ const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -96,6 +121,7 @@ const CampaignCard: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
 };
 
 const CampaignsPage: React.FC = () => {
+  const campaigns = useStore(state => state.campaigns);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'Todas'>('Todas');
   const [platformFilter, setPlatformFilter] = useState<CampaignPlatform | 'Todas'>('Todas');
   const [currentPage, setCurrentPage] = useState(1);
@@ -103,12 +129,12 @@ const CampaignsPage: React.FC = () => {
   const itemsPerPage = 6;
 
   const filteredCampaigns = useMemo(() => {
-    return allCampaigns.filter(c => {
+    return campaigns.filter(c => {
       const statusMatch = statusFilter === 'Todas' || c.status === statusFilter;
       const platformMatch = platformFilter === 'Todas' || c.platform === platformFilter;
       return statusMatch && platformMatch;
     });
-  }, [statusFilter, platformFilter]);
+  }, [statusFilter, platformFilter, campaigns]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / itemsPerPage);
   const paginatedCampaigns = filteredCampaigns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

@@ -1,4 +1,4 @@
-import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database } from 'lucide-react';
+import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database, Lightbulb } from 'lucide-react';
 
 // Tipos
 export type CampaignStatus = 'Ativa' | 'Pausada' | 'Concluída';
@@ -14,10 +14,6 @@ export type Campaign = {
   impressions: number;
   clicks: number;
   conversions: number;
-  ctr: number;
-  cpc: number;
-  startDate: string;
-  endDate: string;
 };
 
 export type Metric = {
@@ -26,6 +22,7 @@ export type Metric = {
   change: string;
   changeType: 'increase' | 'decrease';
   icon: React.ElementType;
+  color: string;
 };
 
 export type Integration = {
@@ -49,6 +46,13 @@ export type ApiKey = {
   lastUsed: string;
 };
 
+export type AiSuggestion = {
+  id: string;
+  text: string;
+  icon: React.ElementType;
+};
+
+
 // Dados Mock
 export const dashboardMetrics: Metric[] = [
   {
@@ -57,6 +61,7 @@ export const dashboardMetrics: Metric[] = [
     change: '+2',
     changeType: 'increase',
     icon: Megaphone,
+    color: 'bg-blue-500/20 text-blue-500',
   },
   {
     title: 'Cliques Totais',
@@ -64,6 +69,7 @@ export const dashboardMetrics: Metric[] = [
     change: '+12.5%',
     changeType: 'increase',
     icon: Target,
+    color: 'bg-purple-500/20 text-purple-500',
   },
   {
     title: 'Taxa de Conversão',
@@ -71,6 +77,7 @@ export const dashboardMetrics: Metric[] = [
     change: '-0.8%',
     changeType: 'decrease',
     icon: Activity,
+    color: 'bg-green-500/20 text-green-500',
   },
   {
     title: 'ROI',
@@ -78,17 +85,17 @@ export const dashboardMetrics: Metric[] = [
     change: '+21%',
     changeType: 'increase',
     icon: DollarSign,
+    color: 'bg-amber-500/20 text-amber-500',
   },
 ];
 
-export const chartData = Array.from({ length: 30 }, (_, i) => {
-  const date = new Date();
-  date.setDate(date.getDate() - (29 - i));
-  return {
-    name: date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
-    Cliques: Math.floor(Math.random() * (300 - 50 + 1)) + 50,
-    Conversoes: Math.floor(Math.random() * (30 - 5 + 1)) + 5,
-  };
+export const chartData = Array.from({ length: 12 }, (_, i) => {
+    const month = new Date(0, i).toLocaleString('pt-BR', { month: 'short' });
+    return {
+      name: month.charAt(0).toUpperCase() + month.slice(1),
+      Cliques: Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000,
+      Conversoes: Math.floor(Math.random() * (500 - 100 + 1)) + 100,
+    };
 });
 
 export const allCampaigns: Campaign[] = [
@@ -102,10 +109,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 120500,
     clicks: 2340,
     conversions: 112,
-    ctr: 1.94,
-    cpc: 0.64,
-    startDate: '2025-06-01',
-    endDate: '2025-07-15',
   },
   {
     id: 'CAM-002',
@@ -117,10 +120,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 850200,
     clicks: 15600,
     conversions: 980,
-    ctr: 1.83,
-    cpc: 0.32,
-    startDate: '2024-11-10',
-    endDate: '2024-11-25',
   },
   {
     id: 'CAM-003',
@@ -132,10 +131,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 45000,
     clicks: 980,
     conversions: 45,
-    ctr: 2.18,
-    cpc: 0.82,
-    startDate: '2025-06-10',
-    endDate: '2025-08-10',
   },
   {
     id: 'CAM-004',
@@ -147,10 +142,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 78000,
     clicks: 1200,
     conversions: 60,
-    ctr: 1.54,
-    cpc: 0.25,
-    startDate: '2025-05-20',
-    endDate: '2025-06-30',
   },
   {
     id: 'CAM-005',
@@ -162,10 +153,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 350000,
     clicks: 8800,
     conversions: 420,
-    ctr: 2.51,
-    cpc: 0.28,
-    startDate: '2025-06-05',
-    endDate: '2025-07-05',
   },
   {
     id: 'CAM-006',
@@ -177,10 +164,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 30000,
     clicks: 1500,
     conversions: 250,
-    ctr: 5.00,
-    cpc: 0.80,
-    startDate: '2025-04-01',
-    endDate: '2025-04-15',
   },
   {
     id: 'CAM-007',
@@ -192,10 +175,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 25000,
     clicks: 400,
     conversions: 15,
-    ctr: 1.60,
-    cpc: 0.38,
-    startDate: '2025-06-20',
-    endDate: '2025-06-27',
   },
   {
     id: 'CAM-008',
@@ -207,10 +186,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 450000,
     clicks: 7500,
     conversions: 300,
-    ctr: 1.67,
-    cpc: 0.43,
-    startDate: '2025-01-15',
-    endDate: '2025-12-31',
   },
   {
     id: 'CAM-009',
@@ -222,10 +197,6 @@ export const allCampaigns: Campaign[] = [
     impressions: 95000,
     clicks: 1800,
     conversions: 95,
-    ctr: 1.89,
-    cpc: 0.28,
-    startDate: '2025-07-01',
-    endDate: '2025-07-31',
   },
   {
     id: 'CAM-010',
@@ -237,14 +208,8 @@ export const allCampaigns: Campaign[] = [
     impressions: 80000,
     clicks: 400,
     conversions: 12,
-    ctr: 0.50,
-    cpc: 5.00,
-    startDate: '2025-05-01',
-    endDate: '2025-05-31',
   },
 ];
-
-export const recentCampaigns: Campaign[] = allCampaigns.slice(0, 5);
 
 export const integrations: Integration[] = [
   { id: 'google-ads', name: 'Google Ads', description: 'Conecte sua conta do Google Ads.', logo: Globe },
@@ -269,6 +234,13 @@ export const apiKeysData: ApiKey[] = [
   { id: 'key-1', key: 'sk_live_******************1234', createdAt: '15/05/2025', lastUsed: '28/06/2025' },
   { id: 'key-2', key: 'sk_test_******************5678', createdAt: '01/03/2025', lastUsed: '25/06/2025' },
 ];
+
+export const aiSuggestions: AiSuggestion[] = [
+  { id: 'sug-1', text: 'Aumentar o orçamento da campanha "Lançamento Verão" em 20%.', icon: Lightbulb },
+  { id: 'sug-2', text: 'Criar um público semelhante (lookalike) com base nos seus melhores clientes.', icon: Lightbulb },
+  { id: 'sug-3', text: 'Testar novos criativos para a campanha de "Geração de Leads B2B".', icon: Lightbulb },
+];
+
 
 export type ChatMessage = {
   id: string;
@@ -307,26 +279,4 @@ export const chatConversations: ChatConversation[] = [
       { id: 'msg-6', role: 'assistant', content: 'Sugiro testar um novo criativo com um vídeo e aumentar o orçamento para o público de "Gerentes de Marketing" em 20%, pois ele está apresentando um CTR 30% maior que a média.' },
     ],
   },
-];
-
-// Analytics Page Data
-export const analyticsMetrics = {
-  totalImpressions: 1250000,
-  totalClicks: 25000,
-  avgCTR: 2.0,
-  avgCPC: 0.55,
-};
-
-export const platformPerformanceData = [
-  { platform: 'Google Ads', clicks: 12000, color: '#4285F4' },
-  { platform: 'Meta', clicks: 9500, color: '#1877F2' },
-  { platform: 'LinkedIn', clicks: 3500, color: '#0A66C2' },
-];
-
-export const audienceDemographicsData = [
-  { name: '18-24', value: 25, fill: '#3B82F6' },
-  { name: '25-34', value: 40, fill: '#8B5CF6' },
-  { name: '35-44', value: 20, fill: '#10B981' },
-  { name: '45-54', value: 10, fill: '#F59E0B' },
-  { name: '55+', value: 5, fill: '#EF4444' },
 ];

@@ -8,7 +8,7 @@ import {
   Settings,
   X,
   PanelLeft,
-  BarChart3, // Ícone para Analytics
+  BarChart3,
 } from 'lucide-react';
 import Logo from '../Logo';
 import { Button } from '../ui/button';
