@@ -6,9 +6,7 @@ import {
   ChatMessage, 
   chatConversations as initialConversations,
   Campaign,
-  ApiKey,
   allCampaigns as initialCampaigns,
-  apiKeysData as initialApiKeys,
 } from '@/data/mocks';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,6 +26,14 @@ export interface NotificationSettings {
   pushMentions: boolean;
   pushIntegrations: boolean;
   pushSuggestions: boolean;
+}
+
+export interface AiConnection {
+  id: string;
+  name: string;
+  apiKey: string;
+  baseUrl?: string;
+  status: 'untested' | 'valid' | 'invalid';
 }
 
 interface AppState {
@@ -62,11 +68,6 @@ interface AppState {
   updateCampaignStatus: (id: string, status: Campaign['status']) => void;
   deleteCampaign: (id: string) => void;
 
-  // API Keys
-  apiKeys: ApiKey[];
-  addApiKey: () => string;
-  deleteApiKey: (id: string) => void;
-
   // Settings
   aiSystemPrompt: string;
   setAiSystemPrompt: (prompt: string) => void;
@@ -74,6 +75,10 @@ interface AppState {
   setTwoFactorEnabled: (enabled: boolean) => void;
   notificationSettings: NotificationSettings;
   updateNotificationSettings: (settings: Partial<NotificationSettings>) => void;
+  aiConnections: AiConnection[];
+  addAiConnection: (connection: Omit<AiConnection, 'id' | 'status'>) => void;
+  updateAiConnection: (id: string, data: Partial<Omit<AiConnection, 'id'>>) => void;
+  removeAiConnection: (id: string) => void;
 }
 
 const initialNotificationSettings: NotificationSettings = {
@@ -97,12 +102,12 @@ export const useStore = create<AppState>()(
           isAuthenticated: false, 
           user: null, 
           campaigns: initialCampaigns,
-          apiKeys: initialApiKeys,
           conversations: initialConversations,
           connectedIntegrations: ['google-analytics', 'github'],
           searchTerm: '',
           isTwoFactorEnabled: false,
           notificationSettings: initialNotificationSettings,
+          aiConnections: [],
         });
       },
       updateUser: (userData) => set((state) => ({
@@ -171,23 +176,6 @@ export const useStore = create<AppState>()(
         campaigns: state.campaigns.filter(c => c.id !== id),
       })),
 
-      // API Keys
-      apiKeys: initialApiKeys,
-      addApiKey: () => {
-        const newKey = `sk_live_${uuidv4().replace(/-/g, '')}`;
-        const newApiKey: ApiKey = {
-          id: `key-${uuidv4()}`,
-          key: newKey,
-          createdAt: new Date().toLocaleDateString('pt-BR'),
-          lastUsed: 'Nunca',
-        };
-        set((state) => ({ apiKeys: [newApiKey, ...state.apiKeys] }));
-        return newKey;
-      },
-      deleteApiKey: (id) => set((state) => ({
-        apiKeys: state.apiKeys.filter(key => key.id !== id),
-      })),
-
       // Settings
       aiSystemPrompt: 'Você é o SyncAds AI, um assistente de marketing digital especializado em otimização de campanhas. Seja proativo, criativo e forneça insights baseados em dados. Suas respostas devem ser claras, concisas e sempre focadas em ajudar o usuário a atingir seus objetivos de marketing.',
       setAiSystemPrompt: (prompt) => set({ aiSystemPrompt: prompt }),
@@ -196,6 +184,16 @@ export const useStore = create<AppState>()(
       notificationSettings: initialNotificationSettings,
       updateNotificationSettings: (settings) => set(state => ({
         notificationSettings: { ...state.notificationSettings, ...settings }
+      })),
+      aiConnections: [],
+      addAiConnection: (connection) => set(state => ({
+        aiConnections: [...state.aiConnections, { ...connection, id: uuidv4(), status: 'untested' }]
+      })),
+      updateAiConnection: (id, data) => set(state => ({
+        aiConnections: state.aiConnections.map(conn => conn.id === id ? { ...conn, ...data } : conn)
+      })),
+      removeAiConnection: (id) => set(state => ({
+        aiConnections: state.aiConnections.filter(conn => conn.id !== id)
       })),
     }),
     {
@@ -208,17 +206,20 @@ export const useStore = create<AppState>()(
         aiSystemPrompt: state.aiSystemPrompt,
         isTwoFactorEnabled: state.isTwoFactorEnabled,
         notificationSettings: state.notificationSettings,
+        aiConnections: state.aiConnections,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           if (!state.campaigns) state.campaigns = initialCampaigns;
-          if (!state.apiKeys) state.apiKeys = initialApiKeys;
           if (!state.conversations) state.conversations = initialConversations;
           if (!Array.isArray(state.connectedIntegrations)) {
             state.connectedIntegrations = ['google-analytics', 'github'];
           }
           if (!state.notificationSettings) {
             state.notificationSettings = initialNotificationSettings;
+          }
+          if (!state.aiConnections) {
+            state.aiConnections = [];
           }
         }
       },

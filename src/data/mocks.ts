@@ -1,4 +1,4 @@
-import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database, Lightbulb, Search, Anchor, BrainCircuit, Newspaper, Music, FolderKanban, Instagram, Twitter, MessageCircle, PenSquare, LayoutTemplate, Flame, Palette, Slack, Webhook, Server } from 'lucide-react';
+import { Bot, BarChart3, Megaphone, Target, DollarSign, Activity, Youtube, Github, Linkedin, Facebook, Globe, Mail, Store, Database, Lightbulb, Search, Anchor, BrainCircuit, Newspaper, Music, FolderKanban, Instagram, Twitter, MessageCircle, PenSquare, LayoutTemplate, Flame, Palette, Slack, Webhook, Server, Sparkles } from 'lucide-react';
 
 // Tipos
 export type CampaignStatus = 'Ativa' | 'Pausada' | 'Concluída';
@@ -47,13 +47,6 @@ export type Invoice = {
   date: string;
   amount: string;
   status: 'Paga' | 'Pendente';
-};
-
-export type ApiKey = {
-  id: string;
-  key: string;
-  createdAt: string;
-  lastUsed: string;
 };
 
 export type AiSuggestion = {
@@ -335,11 +328,6 @@ export const billingHistory: Invoice[] = [
   { id: 'INV-002', date: '01/05/2025', amount: 'R$ 99,00', status: 'Paga' },
   { id: 'INV-003', date: '01/04/2025', amount: 'R$ 99,00', status: 'Paga' },
   { id: 'INV-004', date: '01/03/2025', amount: 'R$ 99,00', status: 'Paga' },
-];
-
-export const apiKeysData: ApiKey[] = [
-  { id: 'key-1', key: 'sk_live_******************1234', createdAt: '15/05/2025', lastUsed: '28/06/2025' },
-  { id: 'key-2', key: 'sk_test_******************5678', createdAt: '01/03/2025', lastUsed: '25/06/2025' },
 ];
 
 export const aiSuggestions: AiSuggestion[] = [

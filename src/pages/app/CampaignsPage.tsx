@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Filter, View, Loader2 } from 'lucide-react';
+import { PlusCircle, Filter, View, Loader2, Megaphone } from 'lucide-react';
 import { Campaign, CampaignStatus, CampaignPlatform } from '@/data/mocks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { useStore } from '@/store/useStore';
 import { useToast } from '@/components/ui/use-toast';
 import { Link } from 'react-router-dom';
 import { EditCampaignModal } from './campaigns/EditCampaignModal';
+import { EmptyState } from '@/components/EmptyState';
 
 const statusVariantMap: Record<CampaignStatus, 'success' | 'warning' | 'default'> = {
   'Ativa': 'success',
@@ -46,80 +48,82 @@ const CampaignCard: React.FC<{ campaign: Campaign; onEdit: (campaign: Campaign) 
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start">
+    <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-lg">{campaign.name}</CardTitle>
+              <CardDescription>{campaign.platform}</CardDescription>
+            </div>
+            <Badge variant={statusVariantMap[campaign.status]}>{campaign.status}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <CardTitle className="text-lg">{campaign.name}</CardTitle>
-            <CardDescription>{campaign.platform}</CardDescription>
+            <div className="flex justify-between text-sm text-muted-foreground mb-1">
+              <span>Orçamento</span>
+              <span>{`R$${campaign.budgetSpent.toLocaleString('pt-BR')} / R$${campaign.budgetTotal.toLocaleString('pt-BR')}`}</span>
+            </div>
+            <Progress value={budgetPercentage} />
           </div>
-          <Badge variant={statusVariantMap[campaign.status]}>{campaign.status}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>Orçamento</span>
-            <span>{`R$${campaign.budgetSpent.toLocaleString('pt-BR')} / R$${campaign.budgetTotal.toLocaleString('pt-BR')}`}</span>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-sm text-muted-foreground">Impressões</p>
+              <p className="font-semibold">{campaign.impressions.toLocaleString('pt-BR')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Cliques</p>
+              <p className="font-semibold">{campaign.clicks.toLocaleString('pt-BR')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Conversões</p>
+              <p className="font-semibold">{campaign.conversions.toLocaleString('pt-BR')}</p>
+            </div>
           </div>
-          <Progress value={budgetPercentage} />
-        </div>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-sm text-muted-foreground">Impressões</p>
-            <p className="font-semibold">{campaign.impressions.toLocaleString('pt-BR')}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Cliques</p>
-            <p className="font-semibold">{campaign.clicks.toLocaleString('pt-BR')}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Conversões</p>
-            <p className="font-semibold">{campaign.conversions.toLocaleString('pt-BR')}</p>
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <AlertDialog>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild><Link to={`/campaigns/${campaign.id}`}><View className="mr-2 h-4 w-4" /> Ver Detalhes</Link></DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onEdit(campaign)}><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleStatusChange}>
-                  {campaign.status === 'Ativa' ? (
-                    <><Pause className="mr-2 h-4 w-4" /> Pausar</>
-                  ) : (
-                    <><Play className="mr-2 h-4 w-4" /> Ativar</>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                    <Trash2 className="mr-2 h-4 w-4" /> Deletar
+          <div className="flex justify-end">
+            <AlertDialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild><Link to={`/campaigns/${campaign.id}`}><View className="mr-2 h-4 w-4" /> Ver Detalhes</Link></DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit(campaign)}><Edit className="mr-2 h-4 w-4" /> Editar</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleStatusChange}>
+                    {campaign.status === 'Ativa' ? (
+                      <><Pause className="mr-2 h-4 w-4" /> Pausar</>
+                    ) : (
+                      <><Play className="mr-2 h-4 w-4" /> Ativar</>
+                    )}
                   </DropdownMenuItem>
-                </AlertDialogTrigger>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. Isso irá deletar permanentemente a campanha "{campaign.name}".
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardContent>
-    </Card>
+                  <DropdownMenuSeparator />
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                      <Trash2 className="mr-2 h-4 w-4" /> Deletar
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Isso irá deletar permanentemente a campanha "{campaign.name}".
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Deletar</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
@@ -212,15 +216,25 @@ const CampaignsPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {paginatedCampaigns.map(campaign => (
-                <CampaignCard key={campaign.id} campaign={campaign} onEdit={handleEditClick} />
-              ))}
-            </div>
+            <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence>
+                {paginatedCampaigns.map(campaign => (
+                  <CampaignCard key={campaign.id} campaign={campaign} onEdit={handleEditClick} />
+                ))}
+              </AnimatePresence>
+            </motion.div>
             {paginatedCampaigns.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                  <p>Nenhuma campanha encontrada com os filtros selecionados.</p>
-              </div>
+              <EmptyState
+                icon={Megaphone}
+                title="Nenhuma campanha encontrada"
+                description="Parece que não há campanhas que correspondam aos seus filtros. Tente ajustar a busca ou crie uma nova campanha."
+                action={
+                  <Button onClick={() => setIsNewModalOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Criar Primeira Campanha
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>

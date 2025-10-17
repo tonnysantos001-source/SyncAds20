@@ -1,141 +1,155 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Trash2, PlusCircle, Check, KeyRound } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useStore } from '@/store/useStore';
+import { useStore, AiConnection } from '@/store/useStore';
+import { PlusCircle, Edit, Trash2, TestTube2, MoreVertical, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { AiConnectionModal } from './AiConnectionModal';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { EmptyState } from '@/components/EmptyState';
 
-export const ApiKeysTab: React.FC = () => {
+const statusConfig = {
+  untested: { text: 'Não testada', icon: HelpCircle, variant: 'secondary' as const },
+  valid: { text: 'Válida', icon: CheckCircle, variant: 'success' as const },
+  invalid: { text: 'Inválida', icon: XCircle, variant: 'destructive' as const },
+};
+
+const ConnectionCard: React.FC<{ connection: AiConnection }> = ({ connection }) => {
   const { toast } = useToast();
-  const apiKeys = useStore(state => state.apiKeys);
-  const addApiKey = useStore(state => state.addApiKey);
-  const deleteApiKey = useStore(state => state.deleteApiKey);
-  const [newKey, setNewKey] = useState<string | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
+  const { updateAiConnection, removeAiConnection } = useStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
 
-  const handleCopy = (key: string) => {
-    navigator.clipboard.writeText(key);
-    toast({ title: "Chave de API copiada!", variant: 'info' });
-  };
-  
-  const handleCopyNewKey = () => {
-    if (!newKey) return;
-    navigator.clipboard.writeText(newKey);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
-  const handleGenerate = () => {
-    const generatedKey = addApiKey();
-    setNewKey(generatedKey);
+  const handleTest = () => {
+    setIsTesting(true);
+    updateAiConnection(connection.id, { status: 'untested' });
+    setTimeout(() => {
+      const isValid = Math.random() > 0.3; // Simulate API call
+      updateAiConnection(connection.id, { status: isValid ? 'valid' : 'invalid' });
+      setIsTesting(false);
+      toast({
+        title: isValid ? 'Conexão Válida!' : 'Falha no Teste',
+        description: isValid ? `A conexão com "${connection.name}" foi bem-sucedida.` : 'Verifique sua chave de API e URL base.',
+        variant: isValid ? 'success' : 'destructive',
+      });
+    }, 1500);
   };
 
-  const handleRevoke = (id: string) => {
-    deleteApiKey(id);
-    toast({
-      title: "Chave de API revogada",
-      description: "A chave de API foi revogada e não pode mais ser usada.",
-      variant: "destructive",
-    });
-  };
+  const status = statusConfig[connection.status];
 
   return (
     <>
+      <AiConnectionModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        connection={connection}
+      />
+      <div className="p-4 border rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-1 overflow-hidden">
+          <h3 className="font-semibold text-lg truncate">{connection.name}</h3>
+          <p className="text-sm text-muted-foreground truncate">
+            URL Base: {connection.baseUrl || 'Padrão (OpenAI)'}
+          </p>
+          <p className="text-sm text-muted-foreground font-mono">
+            Chave: ••••••••••••{connection.apiKey.slice(-4)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          <Badge variant={status.variant}>
+            <status.icon className="h-3 w-3 mr-1" />
+            {status.text}
+          </Badge>
+          <AlertDialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleTest} disabled={isTesting}>
+                  <TestTube2 className="mr-2 h-4 w-4" />
+                  {isTesting ? 'Testando...' : 'Testar Conexão'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem className="text-destructive focus:text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Remover
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso removerá permanentemente a conexão "{connection.name}".
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => removeAiConnection(connection.id)} variant="destructive">
+                  Remover
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export const ApiKeysTab: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const connections = useStore(state => state.aiConnections);
+
+  return (
+    <>
+      <AiConnectionModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} />
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <CardTitle>Chaves de API</CardTitle>
-            <CardDescription>Gerencie suas chaves de API para integrações personalizadas.</CardDescription>
+            <CardTitle>Conexões de IA</CardTitle>
+            <CardDescription>
+              Adicione e gerencie suas chaves de API para modelos de linguagem.
+            </CardDescription>
           </div>
-          <Button onClick={handleGenerate}>
+          <Button onClick={() => setIsModalOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Gerar Nova Chave
+            Adicionar Conexão
           </Button>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Chave (início)</TableHead>
-                <TableHead>Criada em</TableHead>
-                <TableHead>Último Uso</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {apiKeys.length > 0 ? (
-                apiKeys.map((apiKey) => (
-                  <TableRow key={apiKey.id}>
-                    <TableCell className="font-mono">{apiKey.key.substring(0, 15)}...</TableCell>
-                    <TableCell>{apiKey.createdAt}</TableCell>
-                    <TableCell>{apiKey.lastUsed}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleCopy(apiKey.key)}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Revogar chave de API?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta ação não pode ser desfeita. A chave será permanentemente deletada.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleRevoke(apiKey.id)} className="bg-destructive hover:bg-destructive/90">Revogar</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <KeyRound className="h-8 w-8" />
-                      <p>Nenhuma chave de API gerada.</p>
-                      <p className="text-xs">Clique em "Gerar Nova Chave" para começar.</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="space-y-4">
+          {connections.length > 0 ? (
+            connections.map(conn => <ConnectionCard key={conn.id} connection={conn} />)
+          ) : (
+            <EmptyState
+              icon={PlusCircle}
+              title="Nenhuma conexão de IA"
+              description="Adicione sua primeira chave de API de IA para começar a usar os recursos inteligentes da plataforma."
+              action={
+                <Button onClick={() => setIsModalOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Adicionar Primeira Conexão
+                </Button>
+              }
+            />
+          )}
         </CardContent>
         <CardFooter className="border-t px-6 py-4">
           <p className="text-xs text-muted-foreground">
-            Lembre-se de armazenar suas chaves de API com segurança. Elas não serão mostradas novamente.
+            Suas chaves de API são armazenadas de forma segura no seu navegador e nunca são enviadas para nossos servidores.
           </p>
         </CardFooter>
       </Card>
-
-      <Dialog open={!!newKey} onOpenChange={(open) => !open && setNewKey(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nova Chave de API Gerada</DialogTitle>
-            <DialogDescription>
-              Copie sua nova chave de API. Por segurança, ela não será mostrada novamente.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2 my-4">
-            <pre className="flex-1 p-3 bg-muted rounded-md overflow-x-auto text-sm font-mono">{newKey}</pre>
-            <Button size="icon" variant="outline" onClick={handleCopyNewKey}>
-              {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
-          <Button className="w-full" onClick={() => setNewKey(null)}>Feito</Button>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

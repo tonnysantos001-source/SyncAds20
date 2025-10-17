@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { categorizedIntegrations, Integration } from '@/data/mocks';
@@ -52,24 +53,26 @@ const IntegrationCard: React.FC<{ integration: Integration }> = ({ integration }
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Logo className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <CardTitle className="text-lg">{integration.name}</CardTitle>
+      <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Logo className="h-8 w-8 text-muted-foreground" />
+              <div>
+                <CardTitle className="text-lg">{integration.name}</CardTitle>
+              </div>
             </div>
-          </div>
-          {comingSoon ? (
-            <Badge variant="outline">Em breve</Badge>
-          ) : (
-            <Switch checked={isConnected} onCheckedChange={handleToggle} aria-label={`Conectar ${integration.name}`} />
-          )}
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{integration.description}</p>
-        </CardContent>
-      </Card>
+            {comingSoon ? (
+              <Badge variant="outline">Em breve</Badge>
+            ) : (
+              <Switch checked={isConnected} onCheckedChange={handleToggle} aria-label={`Conectar ${integration.name}`} />
+            )}
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{integration.description}</p>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
@@ -105,14 +108,14 @@ const IntegrationsPage: React.FC = () => {
         <p className="text-muted-foreground">Conecte suas ferramentas e automatize seu fluxo de trabalho.</p>
       </div>
       {categorizedIntegrations.map(category => (
-        <div key={category.title} className="space-y-4">
+        <motion.div layout key={category.title} className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight">{category.title}</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {category.integrations.map(integration => (
               <IntegrationCard key={integration.id} integration={integration} />
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       ))}
     </div>
   );
